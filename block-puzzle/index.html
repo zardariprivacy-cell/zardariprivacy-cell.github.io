@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Block Puzzle Master — Free Block Puzzle Game</title>
+<meta name="description" content="Place blocks, complete rows and columns, earn coins and climb the daily leaderboard. A free block puzzle game.">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root{
+    --bg:#0e1220; --panel:#171d31; --panel2:#1f2742; --ink:#eef1ff; --sub:#9aa5c7;
+    --gold:#ffc93c; --teal:#22c7a9; --red:#ff5a6e;
+    --cell:min(9.2vw, 40px);
+  }
+  body{ background:radial-gradient(1200px 800px at 50% -10%, #232c52 0%, var(--bg) 55%);
+        color:var(--ink); font-family:'Segoe UI', system-ui, Arial, sans-serif;
+        min-height:100vh; display:flex; flex-direction:column; align-items:center;
+        padding:10px 8px 26px; user-select:none; -webkit-user-select:none; overflow-x:hidden; }
+  header{ width:100%; max-width:440px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .logo{ font-size:21px; font-weight:800; letter-spacing:.3px; }
+  .logo span{ background:linear-gradient(90deg,#ffc93c,#ff7a59); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .pill{ background:var(--panel2); border:1px solid #2e3a5f; border-radius:999px; padding:5px 11px;
+         font-size:13.5px; font-weight:700; display:flex; align-items:center; gap:5px; white-space:nowrap; }
+  .pill button{ background:var(--gold); color:#221a00; border:none; border-radius:999px; font-weight:800;
+                font-size:11.5px; padding:3px 8px; cursor:pointer; }
+  .hud{ width:100%; max-width:440px; display:flex; gap:8px; margin-top:10px; }
+  .stat{ flex:1; background:var(--panel); border:1px solid #26304f; border-radius:14px; padding:8px 10px; text-align:center; }
+  .stat .lab{ font-size:10.5px; color:var(--sub); text-transform:uppercase; letter-spacing:1px; }
+  .stat .val{ font-size:20px; font-weight:800; margin-top:1px; }
+  .lvlbar{ height:7px; background:#0a0e1a; border-radius:99px; margin-top:6px; overflow:hidden; }
+  .lvlbar i{ display:block; height:100%; width:0%; background:linear-gradient(90deg,#22c7a9,#7ee787); border-radius:99px; transition:width .35s; }
+  #boardWrap{ margin-top:12px; background:var(--panel); border:1px solid #26304f; border-radius:16px; padding:8px; position:relative; }
+  #board{ display:grid; grid-template-columns:repeat(10, var(--cell)); grid-template-rows:repeat(10, var(--cell)); gap:2.5px; touch-action:none; }
+  .bc{ border-radius:5px; background:#232b47; position:relative; transition:background .12s; }
+  .bc.filled{ box-shadow:inset 0 -3px 0 rgba(0,0,0,.28), inset 0 2px 0 rgba(255,255,255,.25); }
+  .bc.ghost-ok{ outline:2px solid #7ee787; outline-offset:-2px; filter:brightness(1.35); }
+  .bc.ghost-bad{ outline:2px solid var(--red); outline-offset:-2px; filter:brightness(.75); }
+  .bc.clearing{ animation:pop .38s ease forwards; }
+  @keyframes pop{ 40%{ transform:scale(1.18); filter:brightness(1.7);} 100%{ transform:scale(.2); opacity:0; } }
+  .c0{ background:#ff5a6e; } .c1{ background:#ff9f43; } .c2{ background:#ffc93c; }
+  .c3{ background:#2ed573; } .c4{ background:#1ebcce; } .c5{ background:#5a7bff; } .c6{ background:#c05aff; }
+  #tray{ width:100%; max-width:440px; display:flex; gap:8px; margin-top:12px; }
+  .slot{ flex:1; height:104px; background:var(--panel); border:1px dashed #2e3a5f; border-radius:14px;
+         display:flex; align-items:center; justify-content:center; }
+  .slot.used{ opacity:.35; }
+  .piece{ display:grid; gap:2.5px; cursor:grab; touch-action:none; }
+  .piece .pc{ border-radius:4px; box-shadow:inset 0 -3px 0 rgba(0,0,0,.28), inset 0 2px 0 rgba(255,255,255,.25); }
+  .piece .pc.empty{ background:transparent; box-shadow:none; }
+  #dragEl{ position:fixed; z-index:60; pointer-events:none; display:grid; gap:2.5px; opacity:.92; filter:drop-shadow(0 10px 14px rgba(0,0,0,.5)); }
+  .btnrow{ width:100%; max-width:440px; display:flex; gap:8px; margin-top:12px; }
+  .btn{ flex:1; border:none; border-radius:13px; padding:12px 6px; font-size:14.5px; font-weight:800; cursor:pointer; color:#0d1020; }
+  .btn.gold{ background:linear-gradient(180deg,#ffd964,#f5b921); }
+  .btn.teal{ background:linear-gradient(180deg,#3fe0c0,#17b08f); }
+  .btn.ghost{ background:var(--panel2); color:var(--ink); border:1px solid #2e3a5f; }
+  .btn:active{ transform:scale(.97); }
+  #floatScore{ position:fixed; z-index:70; pointer-events:none; font-weight:900; font-size:21px; color:#7ee787;
+               text-shadow:0 2px 8px rgba(0,0,0,.6); opacity:0; }
+  #floatScore.show{ animation:floatUp 1s ease forwards; }
+  @keyframes floatUp{ 0%{ opacity:0; transform:translateY(6px);} 18%{ opacity:1;} 100%{ opacity:0; transform:translateY(-42px);} }
+  .overlay{ position:fixed; inset:0; background:rgba(5,7,14,.78); z-index:80; display:none;
+            align-items:center; justify-content:center; padding:16px; }
+  .overlay.open{ display:flex; }
+  .card{ background:var(--panel); border:1px solid #2e3a5f; border-radius:20px; padding:22px 18px;
+         width:100%; max-width:380px; text-align:center; box-shadow:0 24px 60px rgba(0,0,0,.5); }
+  .card h2{ font-size:23px; margin-bottom:6px; }
+  .card p{ color:var(--sub); font-size:14px; line-height:1.45; }
+  .card .big{ font-size:38px; font-weight:900; color:var(--gold); margin:8px 0 2px; }
+  .card .row{ display:flex; gap:8px; margin-top:14px; }
+  .card input{ width:100%; padding:12px; border-radius:12px; border:1px solid #2e3a5f; background:#0d1120;
+               color:var(--ink); font-size:16px; text-align:center; margin-top:12px; outline:none; }
+  table.lb{ width:100%; border-collapse:collapse; margin-top:10px; font-size:14px; }
+  table.lb td, table.lb th{ padding:7px 6px; border-bottom:1px solid #26304f; text-align:left; }
+  table.lb th{ color:var(--sub); font-size:11px; text-transform:uppercase; letter-spacing:1px; }
+  table.lb tr.me td{ color:var(--gold); font-weight:800; }
+  #adBox{ background:#000; border-radius:14px; margin-top:12px; padding:26px 10px; border:1px solid #2e3a5f; }
+  #adBox .adtag{ display:inline-block; background:var(--gold); color:#000; font-size:10px; font-weight:900; padding:2px 6px; border-radius:4px; letter-spacing:1px; }
+  #adCount{ font-size:40px; font-weight:900; margin-top:8px; }
+  .foot{ margin-top:14px; color:var(--sub); font-size:12px; text-align:center; max-width:440px; line-height:1.5; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🧩 Block Puzzle <span>Master</span></div>
+  <div class="pill">🪙 <span id="coins">0</span> <button id="btnFreeCoins" title="Watch ad, get free coins">+ FREE</button></div>
+  <div class="pill" id="btnSound" style="cursor:pointer">🔊</div>
+</header>
+
+<div class="hud">
+  <div class="stat"><div class="lab">Score</div><div class="val" id="score">0</div></div>
+  <div class="stat"><div class="lab">Best</div><div class="val" id="best">0</div></div>
+  <div class="stat"><div class="lab">Level <span id="level">1</span></div>
+    <div class="lvlbar"><i id="lvlFill"></i></div>
+    <div class="lab" id="lvlNext" style="margin-top:3px">Next: 300</div></div>
+</div>
+
+<div id="boardWrap"><div id="board"></div></div>
+<div id="tray"></div>
+
+<div class="btnrow">
+  <button class="btn gold" id="btnBoard">🏆 Daily Leaderboard</button>
+  <button class="btn ghost" id="btnHow">❓ How to Play</button>
+  <button class="btn teal" id="btnRestart">↻ New Game</button>
+</div>
+
+<div class="foot">Drag blocks onto the grid. Fill a full <b>row</b> or <b>column</b> to clear it.<br>
+Clear lines to earn 🪙 coins — spend coins or watch an ad to continue after game over.</div>
+
+<div id="floatScore"></div>
+
+<!-- NAME -->
+<div class="overlay" id="ovName">
+  <div class="card">
+    <h2>👋 Welcome, Master!</h2>
+    <p>Apna naam likho — yehi naam <b>Daily Leaderboard</b> par nazar aayega.</p>
+    <input id="inpName" maxlength="24" placeholder="Your name">
+    <div class="row"><button class="btn gold" id="btnSaveName" style="flex:1">▶ Start Playing</button></div>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div class="overlay" id="ovBoard">
+  <div class="card">
+    <h2>🏆 Daily Leaderboard</h2>
+    <p id="lbDate"></p>
+    <div id="lbBody"><p style="margin-top:12px">Loading…</p></div>
+    <div class="row"><button class="btn ghost" id="btnCloseBoard" style="flex:1">Close</button></div>
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div class="overlay" id="ovOver">
+  <div class="card">
+    <h2>😵 Game Over!</h2>
+    <p>Koi block fit nahi ho raha. Tumhara score:</p>
+    <div class="big" id="finalScore">0</div>
+    <p id="overMsg"></p>
+    <div class="row">
+      <button class="btn gold" id="btnAdContinue" style="flex:1">🎬 Watch Ad<br><small>Continue FREE</small></button>
+      <button class="btn teal" id="btnCoinContinue" style="flex:1">🪙 100 Coins<br><small>Continue</small></button>
+    </div>
+    <div class="row"><button class="btn ghost" id="btnEndGame" style="flex:1">End Game — Submit Score</button></div>
+  </div>
+</div>
+
+<!-- AD (simulated break) -->
+<div class="overlay" id="ovAd">
+  <div class="card">
+    <h2>📺 Advertisement</h2>
+    <div id="adBox">
+      <span class="adtag">AD</span>
+      <div style="font-size:19px;font-weight:800;margin-top:10px">Block Puzzle Master</div>
+      <p>Your game continues in…</p>
+      <div id="adCount">5</div>
+    </div>
+    <p style="margin-top:10px">Reward milega ad khatam hone par 🎁</p>
+  </div>
+</div>
+
+<!-- HOW TO -->
+<div class="overlay" id="ovHow">
+  <div class="card">
+    <h2>❓ How to Play</h2>
+    <p style="text-align:left">
+      🖐️ Neeche diye gaye <b>3 blocks</b> ko drag karke grid par rakho.<br><br>
+      ✨ Jo <b>row</b> ya <b>column</b> poori bhar jaye, wo clear ho jati hai — score + 🪙 coins milte hain.<br><br>
+      🔥 Lagatar clears par <b>combo</b> — zyada score!<br><br>
+      📈 Har 300 points par <b>Level</b> barhta hai — blocks mushkil hote jate hain.<br><br>
+      😵 Jab koi block fit na ho to game over — lekin <b>ad dekh kar</b> ya <b>100 coins</b> se continue kar sakte ho (neeche ki 4 rows saaf ho jayengi).<br><br>
+      🏆 Roz ka score <b>Daily Leaderboard</b> par chadh jata hai!
+    </p>
+    <div class="row"><button class="btn gold" id="btnCloseHow" style="flex:1">Samajh gaya!</button></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ================= CONFIG ================= */
+const DB_URL = "https://block-puzzle-master-43b28-default-rtdb.firebaseio.com"; // daily leaderboard backend (Firebase RTDB)
+const N = 10;                    // 10x10 board
+const COIN_CONTINUE = 100;       // coins to continue after game over
+const FREE_COINS = 50;           // coins per free-coins ad
+const LEVEL_EVERY = 300;         // points per level
+
+/* ================= PIECES ================= */
+/* shape strings: X = block. tier = minimum difficulty band where it gets common */
+const SHAPES = [
+  { s:["X"], t:0 }, { s:["XX"], t:0 }, { s:["X","X"], t:0 },
+  { s:["XXX"], t:0 }, { s:["X","X","X"], t:0 },
+  { s:["XX","XX"], t:0 },
+  { s:["XX","X."], t:0 }, { s:["XX",".X"], t:0 }, { s:["X.","XX"], t:0 }, { s:[".X","XX"], t:0 },
+  { s:["XXXX"], t:1 }, { s:["X","X","X","X"], t:1 },
+  { s:["XXX",".X."], t:1 }, { s:[".X.","XXX"], t:1 }, { s:["X.","XX","X."], t:1 }, { s:[".X","XX",".X"], t:1 },
+  { s:["XXX","X.."], t:1 }, { s:["XXX","..X"], t:1 }, { s:["X..","XXX"], t:1 }, { s:["..X","XXX"], t:1 },
+  { s:[".XX","XX."], t:1 }, { s:["XX.",".XX"], t:1 }, { s:["X.","XX",".X"], t:1 }, { s:[".X","XX","X."], t:1 },
+  { s:["XXXXX"], t:2 }, { s:["X","X","X","X","X"], t:2 },
+  { s:["XX","XX","XX"], t:2 }, { s:["XXX","XXX"], t:2 },
+  { s:["X..","X..","XXX"], t:2 }, { s:["..X","..X","XXX"], t:2 }, { s:["XXX","X..","X.."], t:2 }, { s:["XXX","..X","..X"], t:2 },
+  { s:[".X.","XXX",".X."], t:2 },
+  { s:["XXX","XXX","XXX"], t:3 },
+  { s:["XX.",".XX",".XX"], t:3 }, { s:[".XX",".XX","XX."], t:3 },
+  { s:["X.X","XXX"], t:3 }, { s:["XXX","X.X"], t:3 }
+];
+const pieces = SHAPES.map((p, i) => {
+  const cells = [];
+  p.s.forEach((row, r) => { for (let c = 0; c < row.length; c++) if (row[c] === "X") cells.push([r, c]); });
+  return { cells, rows: p.s.length, cols: p.s[0].length, tier: p.t, color: i % 7, size: cells.length };
+});
+
+/* ================= STATE ================= */
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d){ try { const v = localStorage.getItem("bpm_" + k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem("bpm_" + k, JSON.stringify(v)); } catch(e){} }
+};
+let grid, tray, score, streak, coins, best, level, gameActive, continued;
+let justCleared = new Set();
+let playerName = store.get("name", "");
+let deviceId = store.get("did", "");
+if (!deviceId) { deviceId = "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 9); store.set("did", deviceId); }
+coins = store.get("coins", 100);            // starter coins
+best = store.get("best", 0);
+let soundOn = store.get("sound", true);
+
+/* ================= AUDIO (tiny synth) ================= */
+let AC = null;
+function beep(freq, dur, type, vol){
+  if (!soundOn) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type || "sine"; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol || .12, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, AC.currentTime + (dur || .12));
+    o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime + (dur || .12));
+  } catch(e){}
+}
+const sfx = {
+  place(){ beep(330, .09, "triangle", .15); },
+  clear(n){ [523, 659, 784, 1046].slice(0, 2 + n).forEach((f, i) => setTimeout(() => beep(f, .14, "triangle", .14), i * 55)); },
+  over(){ [392, 330, 262, 196].forEach((f, i) => setTimeout(() => beep(f, .2, "sawtooth", .07), i * 130)); },
+  coin(){ beep(988, .08, "square", .08); setTimeout(() => beep(1319, .14, "square", .08), 70); },
+  level(){ [440, 554, 659, 880].forEach((f, i) => setTimeout(() => beep(f, .13, "triangle", .13), i * 60)); }
+};
+
+/* ================= GAME CORE ================= */
+function newGame(){
+  grid = Array.from({ length: N }, () => Array(N).fill(-1));
+  score = 0; streak = 0; level = 1; gameActive = true; continued = 0;
+  dealPieces(); renderAll();
+}
+function dealPieces(){ tray = [pickPiece(), pickPiece(), pickPiece()]; }
+function pickPiece(){
+  const band = level >= 6 ? 3 : level >= 4 ? 2 : level >= 2 ? 1 : 0;
+  const pool = [];
+  pieces.forEach(p => {
+    let w = p.tier === 0 ? 10 : p.tier === 1 ? 7 : p.tier === 2 ? 4 : 2;
+    if (p.tier > band) w = Math.max(1, w - 5);          // rare before its band
+    if (p.tier === band && band > 0) w += 4;            // current band is common
+    if (p.size <= 2 && level >= 5) w = 2;               // fewer tiny pieces late
+    for (let i = 0; i < w; i++) pool.push(p);
+  });
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+function canPlace(p, r0, c0){
+  for (const [r, c] of p.cells){
+    const rr = r0 + r, cc = c0 + c;
+    if (rr < 0 || cc < 0 || rr >= N || cc >= N || grid[rr][cc] !== -1) return false;
+  }
+  return true;
+}
+function fitsAnywhere(p){
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (canPlace(p, r, c)) return true;
+  return false;
+}
+function placePiece(p, r0, c0){
+  for (const [r, c] of p.cells) grid[r0 + r][c0 + c] = p.color;
+  score += p.size;
+  sfx.place();
+  const cleared = clearLines();
+  if (cleared > 0){
+    streak++;
+    const pts = cleared * 10 * streak + (cleared > 1 ? (cleared - 1) * 10 : 0);
+    score += pts;
+    const got = cleared * 5 + (cleared > 1 ? 10 : 0);
+    coins += got; store.set("coins", coins); sfx.coin();
+    floatText("+" + pts + (streak > 1 ? "  🔥x" + streak : ""));
+    sfx.clear(cleared);
+  } else streak = 0;
+  const newLevel = Math.floor(score / LEVEL_EVERY) + 1;
+  if (newLevel > level){ level = newLevel; sfx.level(); floatText("⭐ LEVEL " + level); }
+  if (score > best){ best = score; store.set("best", best); }
+  renderAll();
+  checkEnd();
+}
+function clearLines(){
+  const rows = [], cols = [];
+  for (let r = 0; r < N; r++) if (grid[r].every(v => v !== -1)) rows.push(r);
+  for (let c = 0; c < N; c++){ let full = true; for (let r = 0; r < N; r++) if (grid[r][c] === -1){ full = false; break; } if (full) cols.push(c); }
+  const n = rows.length + cols.length;
+  if (!n) return 0;
+  const cells = new Set();
+  rows.forEach(r => { for (let c = 0; c < N; c++) cells.add(r * N + c); });
+  cols.forEach(c => { for (let r = 0; r < N; r++) cells.add(r * N + c); });
+  cells.forEach(k => { grid[Math.floor(k / N)][k % N] = -1; });
+  justCleared = cells;
+  setTimeout(() => { justCleared = new Set(); }, 420);
+  return n;
+}
+function checkEnd(){
+  const left = tray.filter(Boolean);
+  if (left.length && left.every(p => !fitsAnywhere(p))) setTimeout(gameOver, 420);
+}
+function gameOver(){
+  if (!gameActive) return;
+  gameActive = false;
+  sfx.over();
+  $("finalScore").textContent = score;
+  $("overMsg").textContent = score >= best && score > 0 ? "🏅 New BEST score!" :
+    "Best: " + best + " • Level " + level + " tak pohanchay";
+  $("btnCoinContinue").innerHTML = "🪙 " + COIN_CONTINUE + " Coins<br><small>Continue (tumhare: " + coins + ")</small>";
+  $("ovOver").classList.add("open");
+}
+/* Rescue: clear the bottom 4 rows and deal fresh pieces */
+function rescue(){
+  for (let r = N - 4; r < N; r++) for (let c = 0; c < N; c++) grid[r][c] = -1;
+  dealPieces(); gameActive = true; continued++;
+  $("ovOver").classList.remove("open");
+  renderAll(); floatText("💪 Continue! Neeche saaf ho gaya");
+  checkEnd();
+}
+
+/* ================= RENDERING ================= */
+const boardEl = $("board"), trayEl = $("tray");
+function buildBoard(){
+  boardEl.innerHTML = "";
+  for (let i = 0; i < N * N; i++){
+    const d = document.createElement("div");
+    d.className = "bc";
+    boardEl.appendChild(d);
+  }
+}
+function renderAll(){
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++){
+    const el = boardEl.children[r * N + c], v = grid[r][c];
+    el.className = "bc" + (v >= 0 ? " filled c" + v : "") + (justCleared.has(r * N + c) ? " clearing" : "");
+  }
+  trayEl.innerHTML = "";
+  tray.forEach((p, i) => {
+    const slot = document.createElement("div");
+    slot.className = "slot" + (p ? "" : " used");
+    if (p) slot.appendChild(pieceEl(p, miniCell()));
+    trayEl.appendChild(slot);
+  });
+  $("score").textContent = score;
+  $("best").textContent = best;
+  $("coins").textContent = coins;
+  $("level").textContent = level;
+  const into = score % LEVEL_EVERY;
+  $("lvlFill").style.width = (into / LEVEL_EVERY * 100) + "%";
+  $("lvlNext").textContent = "Next: " + (score - into + LEVEL_EVERY);
+}
+function cellPx(){ return boardEl.children[0].getBoundingClientRect().width + 2.5; }
+function miniCell(){ return Math.max(13, Math.min(19, cellPx() * .52)); }
+function pieceEl(p, cell){
+  const el = document.createElement("div");
+  el.className = "piece";
+  el.style.gridTemplateColumns = "repeat(" + p.cols + ", " + cell + "px)";
+  el.style.gridTemplateRows = "repeat(" + p.rows + ", " + cell + "px)";
+  const filled = new Set(p.cells.map(([r, c]) => r * p.cols + c));
+  for (let i = 0; i < p.rows * p.cols; i++){
+    const d = document.createElement("div");
+    d.className = "pc" + (filled.has(i) ? " c" + p.color : " empty");
+    el.appendChild(d);
+  }
+  return el;
+}
+function floatText(txt){
+  const f = $("floatScore");
+  f.textContent = txt;
+  const r = boardEl.getBoundingClientRect();
+  f.style.left = (r.left + r.width / 2 - 40) + "px";
+  f.style.top = (r.top + r.height / 2 - 14) + "px";
+  f.classList.remove("show"); void f.offsetWidth; f.classList.add("show");
+}
+
+/* ================= DRAG & DROP ================= */
+let drag = null; // { p, slotIdx, el, grabR, grabC }
+trayEl.addEventListener("pointerdown", e => {
+  if (!gameActive) return;
+  const slotEl = e.target.closest(".slot");
+  if (!slotEl) return;
+  const idx = [...trayEl.children].indexOf(slotEl);
+  const p = tray[idx];
+  if (!p) return;
+  const pieceNode = slotEl.querySelector(".piece");
+  if (!pieceNode) return;
+  /* which cell of the piece was grabbed? */
+  const cells = pieceNode.children;
+  let grabR = 0, grabC = 0;
+  for (let i = 0; i < cells.length; i++){
+    const b = cells[i].getBoundingClientRect();
+    if (e.clientX >= b.left && e.clientX <= b.right && e.clientY >= b.top && e.clientY <= b.bottom){
+      grabR = Math.floor(i / p.cols); grabC = i % p.cols; break;
+    }
+  }
+  const el = pieceEl(p, cellPx() - 2.5);
+  el.id = "dragEl";
+  document.body.appendChild(el);
+  drag = { p, idx, el, grabR, grabC };
+  moveDrag(e);
+  e.preventDefault();
+});
+window.addEventListener("pointermove", e => { if (drag) moveDrag(e); });
+window.addEventListener("pointerup", e => {
+  if (!drag) return;
+  const t = targetCell(e);
+  const d = drag; drag = null;
+  d.el.remove();
+  clearGhost();
+  if (t && canPlace(d.p, t.r, t.c)){
+    tray[d.idx] = null;
+    if (tray.every(x => !x)) dealPieces();
+    placePiece(d.p, t.r, t.c);
+  } else renderAll();
+});
+function moveDrag(e){
+  const cell = cellPx();
+  /* float the piece so the grabbed cell sits ~1.5 cells above the finger */
+  drag.el.style.left = (e.clientX - (drag.grabC + .5) * cell) + "px";
+  drag.el.style.top = (e.clientY - (drag.grabR + .5) * cell - cell * 1.4) + "px";
+  const t = targetCell(e);
+  clearGhost();
+  if (t){
+    const ok = canPlace(drag.p, t.r, t.c);
+    for (const [r, c] of drag.p.cells){
+      const rr = t.r + r, cc = t.c + c;
+      if (rr >= 0 && cc >= 0 && rr < N && cc < N)
+        boardEl.children[rr * N + cc].classList.add(ok ? "ghost-ok" : "ghost-bad");
+    }
+  }
+}
+function targetCell(e){
+  const rect = boardEl.getBoundingClientRect(), cell = cellPx();
+  const px = e.clientX, py = e.clientY - cell * 1.4; // grabbed cell floats above the finger
+  const c = Math.floor((px - rect.left) / cell) - drag.grabC;
+  const r = Math.floor((py - rect.top) / cell) - drag.grabR;
+  if (r < -2 || c < -2 || r >= N || c >= N) return null;
+  return { r, c };
+}
+function clearGhost(){
+  [...boardEl.children].forEach(el => el.classList.remove("ghost-ok", "ghost-bad"));
+}
+
+/* ================= DAILY LEADERBOARD ================= */
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+async function submitScore(){
+  if (!DB_URL.startsWith("http") || score <= 0) return;
+  try {
+    const url = DB_URL + "/daily/" + todayStr() + "/" + deviceId + ".json";
+    const prev = await (await fetch(url)).json();
+    if (!prev || score > prev.score){
+      await fetch(url, { method: "PUT", body: JSON.stringify({ name: playerName || "Player", score, ts: Date.now() }) });
+    }
+  } catch(e){ /* offline — score stays on device */ }
+}
+async function loadBoard(){
+  const body = $("lbBody");
+  $("lbDate").textContent = "📅 " + todayStr() + " — aaj ke top players";
+  body.innerHTML = "<p style='margin-top:12px'>Loading…</p>";
+  if (!DB_URL.startsWith("http")){ body.innerHTML = "<p style='margin-top:12px'>Leaderboard abhi setup ho raha hai — tumhara best score is phone par save hai: <b>" + best + "</b></p>"; return; }
+  try {
+    const data = await (await fetch(DB_URL + "/daily/" + todayStr() + ".json")).json();
+    if (!data){ body.innerHTML = "<p style='margin-top:12px'>Aaj abhi koi score nahi — <b>pehle number par tum aa sakte ho!</b> 🏆</p>"; return; }
+    const rows = Object.entries(data).map(([id, v]) => ({ id, name: v.name || "Player", score: v.score || 0 }))
+      .sort((a, b) => b.score - a.score);
+    let html = "<table class='lb'><tr><th>#</th><th>Player</th><th>Score</th></tr>";
+    rows.slice(0, 20).forEach((r, i) => {
+      html += "<tr" + (r.id === deviceId ? " class='me'" : "") + "><td>" + (i + 1) + "</td><td>" +
+        r.name.replace(/</g, "&lt;") + (r.id === deviceId ? " (tum)" : "") + "</td><td>" + r.score + "</td></tr>";
+    });
+    const myRank = rows.findIndex(r => r.id === deviceId);
+    if (myRank >= 20) html += "<tr class='me'><td>" + (myRank + 1) + "</td><td>" + (playerName || "Player") + " (tum)</td><td>" + rows[myRank].score + "</td></tr>";
+    body.innerHTML = html + "</table>";
+  } catch(e){
+    body.innerHTML = "<p style='margin-top:12px'>Internet nahi mil raha — leaderboard offline hai. Tumhara best: <b>" + best + "</b></p>";
+  }
+}
+
+/* ================= ADS (break + reward) ================= */
+let adBusy = false;
+function showAd(onReward){
+  if (adBusy) return;
+  adBusy = true;
+  $("ovAd").classList.add("open");
+  let n = 5;
+  $("adCount").textContent = n;
+  const iv = setInterval(() => {
+    n--;
+    if (n <= 0){
+      clearInterval(iv);
+      $("ovAd").classList.remove("open");
+      adBusy = false;
+      onReward();
+    } else $("adCount").textContent = n;
+  }, 1000);
+}
+
+/* ================= WIRING ================= */
+$("btnSaveName").onclick = () => {
+  const v = $("inpName").value.trim();
+  playerName = v || "Player";
+  store.set("name", playerName);
+  $("ovName").classList.remove("open");
+  sfx.coin();
+};
+$("btnBoard").onclick = () => { $("ovBoard").classList.add("open"); loadBoard(); };
+$("btnCloseBoard").onclick = () => $("ovBoard").classList.remove("open");
+$("btnHow").onclick = () => $("ovHow").classList.add("open");
+$("btnCloseHow").onclick = () => $("ovHow").classList.remove("open");
+$("btnRestart").onclick = () => { $("ovOver").classList.remove("open"); newGame(); };
+$("btnSound").onclick = () => {
+  soundOn = !soundOn; store.set("sound", soundOn);
+  $("btnSound").textContent = soundOn ? "🔊" : "🔇";
+};
+$("btnAdContinue").onclick = () => { $("ovOver").classList.remove("open"); showAd(rescue); };
+$("btnCoinContinue").onclick = () => {
+  if (coins >= COIN_CONTINUE){
+    coins -= COIN_CONTINUE; store.set("coins", coins);
+    rescue();
+  } else {
+    $("overMsg").textContent = "🪙 Coins kam hain (" + coins + "/" + COIN_CONTINUE + ") — upar wale FREE button se ad dekh kar coins lo, ya Watch Ad se FREE continue karo!";
+    sfx.over();
+  }
+};
+$("btnEndGame").onclick = async () => {
+  $("ovOver").classList.remove("open");
+  await submitScore();
+  $("ovBoard").classList.add("open");
+  loadBoard();
+  newGame();
+};
+$("btnFreeCoins").onclick = () => {
+  const last = store.get("lastFree", 0);
+  const wait = 60 - Math.floor((Date.now() - last) / 1000);
+  if (wait > 0){ floatText("⏳ " + wait + "s baad phir FREE coins"); return; }
+  showAd(() => {
+    coins += FREE_COINS; store.set("coins", coins);
+    store.set("lastFree", Date.now());
+    renderAll(); sfx.coin(); floatText("🪙 +" + FREE_COINS + " FREE coins!");
+  });
+};
+
+/* ================= INIT ================= */
+$("btnSound").textContent = soundOn ? "🔊" : "🔇";
+buildBoard();
+newGame();
+if (!playerName) $("ovName").classList.add("open");
+</script>
+</body>
+</html>
