@@ -111,7 +111,7 @@ Clear lines to earn 🪙 coins — spend coins or watch an ad to continue after 
 <div class="overlay" id="ovName">
   <div class="card">
     <h2>👋 Welcome, Master!</h2>
-    <p>Apna naam likho — yehi naam <b>Daily Leaderboard</b> par nazar aayega.</p>
+    <p>Write your name — this name will appear on the <b>Daily Leaderboard</b>.</p>
     <input id="inpName" maxlength="24" placeholder="Your name">
     <div class="row"><button class="btn gold" id="btnSaveName" style="flex:1">▶ Start Playing</button></div>
   </div>
@@ -131,7 +131,7 @@ Clear lines to earn 🪙 coins — spend coins or watch an ad to continue after 
 <div class="overlay" id="ovOver">
   <div class="card">
     <h2>😵 Game Over!</h2>
-    <p>Koi block fit nahi ho raha. Tumhara score:</p>
+    <p>No block fits anymore. Your score:</p>
     <div class="big" id="finalScore">0</div>
     <p id="overMsg"></p>
     <div class="row">
@@ -152,7 +152,7 @@ Clear lines to earn 🪙 coins — spend coins or watch an ad to continue after 
       <p>Your game continues in…</p>
       <div id="adCount">5</div>
     </div>
-    <p style="margin-top:10px">Reward milega ad khatam hone par 🎁</p>
+    <p style="margin-top:10px">Your reward arrives when the ad ends 🎁</p>
   </div>
 </div>
 
@@ -161,14 +161,14 @@ Clear lines to earn 🪙 coins — spend coins or watch an ad to continue after 
   <div class="card">
     <h2>❓ How to Play</h2>
     <p style="text-align:left">
-      🖐️ Neeche diye gaye <b>3 blocks</b> ko drag karke grid par rakho.<br><br>
-      ✨ Jo <b>row</b> ya <b>column</b> poori bhar jaye, wo clear ho jati hai — score + 🪙 coins milte hain.<br><br>
-      🔥 Lagatar clears par <b>combo</b> — zyada score!<br><br>
-      📈 Har 300 points par <b>Level</b> barhta hai — blocks mushkil hote jate hain.<br><br>
-      😵 Jab koi block fit na ho to game over — lekin <b>ad dekh kar</b> ya <b>100 coins</b> se continue kar sakte ho (neeche ki 4 rows saaf ho jayengi).<br><br>
-      🏆 Roz ka score <b>Daily Leaderboard</b> par chadh jata hai!
+      🖐️ Drag the <b>3 blocks</b> below onto the grid.<br><br>
+      ✨ When a <b>row</b> or <b>column</b> is completely filled, it clears — you earn score + 🪙 coins.<br><br>
+      🔥 Clear lines back-to-back for a <b>combo</b> — more score!<br><br>
+      📈 Every 300 points you go up a <b>Level</b> — the blocks get harder.<br><br>
+      😵 When no block fits, it's game over — but you can continue by <b>watching an ad</b> or paying <b>100 coins</b> (the bottom 4 rows will be cleared).<br><br>
+      🏆 Your daily score goes on the <b>Daily Leaderboard</b>!
     </p>
-    <div class="row"><button class="btn gold" id="btnCloseHow" style="flex:1">Samajh gaya!</button></div>
+    <div class="row"><button class="btn gold" id="btnCloseHow" style="flex:1">Got it!</button></div>
   </div>
 </div>
 
@@ -316,7 +316,7 @@ function gameOver(){
   sfx.over();
   $("finalScore").textContent = score;
   $("overMsg").textContent = score >= best && score > 0 ? "🏅 New BEST score!" :
-    "Best: " + best + " • Level " + level + " tak pohanchay";
+    "Best: " + best + " • You reached Level " + level;
   $("btnCoinContinue").innerHTML = "🪙 " + COIN_CONTINUE + " Coins<br><small>Continue (tumhare: " + coins + ")</small>";
   $("ovOver").classList.add("open");
 }
@@ -325,7 +325,7 @@ function rescue(){
   for (let r = N - 4; r < N; r++) for (let c = 0; c < N; c++) grid[r][c] = -1;
   dealPieces(); gameActive = true; continued++;
   $("ovOver").classList.remove("open");
-  renderAll(); floatText("💪 Continue! Neeche saaf ho gaya");
+  renderAll(); floatText("💪 Continue! Bottom rows cleared");
   checkEnd();
 }
 
@@ -468,24 +468,24 @@ async function submitScore(){
 }
 async function loadBoard(){
   const body = $("lbBody");
-  $("lbDate").textContent = "📅 " + todayStr() + " — aaj ke top players";
+  $("lbDate").textContent = "📅 " + todayStr() + " — today's top players";
   body.innerHTML = "<p style='margin-top:12px'>Loading…</p>";
-  if (!DB_URL.startsWith("http")){ body.innerHTML = "<p style='margin-top:12px'>Leaderboard abhi setup ho raha hai — tumhara best score is phone par save hai: <b>" + best + "</b></p>"; return; }
+  if (!DB_URL.startsWith("http")){ body.innerHTML = "<p style='margin-top:12px'>Leaderboard is being set up — your best score saved on this phone: <b>" + best + "</b></p>"; return; }
   try {
     const data = await (await fetch(DB_URL + "/daily/" + todayStr() + ".json")).json();
-    if (!data){ body.innerHTML = "<p style='margin-top:12px'>Aaj abhi koi score nahi — <b>pehle number par tum aa sakte ho!</b> 🏆</p>"; return; }
+    if (!data){ body.innerHTML = "<p style='margin-top:12px'>No scores yet today — <b>you can be the first at #1!</b> 🏆</p>"; return; }
     const rows = Object.entries(data).map(([id, v]) => ({ id, name: v.name || "Player", score: v.score || 0 }))
       .sort((a, b) => b.score - a.score);
     let html = "<table class='lb'><tr><th>#</th><th>Player</th><th>Score</th></tr>";
     rows.slice(0, 20).forEach((r, i) => {
       html += "<tr" + (r.id === deviceId ? " class='me'" : "") + "><td>" + (i + 1) + "</td><td>" +
-        r.name.replace(/</g, "&lt;") + (r.id === deviceId ? " (tum)" : "") + "</td><td>" + r.score + "</td></tr>";
+        r.name.replace(/</g, "&lt;") + (r.id === deviceId ? " (you)" : "") + "</td><td>" + r.score + "</td></tr>";
     });
     const myRank = rows.findIndex(r => r.id === deviceId);
-    if (myRank >= 20) html += "<tr class='me'><td>" + (myRank + 1) + "</td><td>" + (playerName || "Player") + " (tum)</td><td>" + rows[myRank].score + "</td></tr>";
+    if (myRank >= 20) html += "<tr class='me'><td>" + (myRank + 1) + "</td><td>" + (playerName || "Player") + " (you)</td><td>" + rows[myRank].score + "</td></tr>";
     body.innerHTML = html + "</table>";
   } catch(e){
-    body.innerHTML = "<p style='margin-top:12px'>Internet nahi mil raha — leaderboard offline hai. Tumhara best: <b>" + best + "</b></p>";
+    body.innerHTML = "<p style='margin-top:12px'>No internet connection — the leaderboard is offline. Your best: <b>" + best + "</b></p>";
   }
 }
 
@@ -531,7 +531,7 @@ $("btnCoinContinue").onclick = () => {
     coins -= COIN_CONTINUE; store.set("coins", coins);
     rescue();
   } else {
-    $("overMsg").textContent = "🪙 Coins kam hain (" + coins + "/" + COIN_CONTINUE + ") — upar wale FREE button se ad dekh kar coins lo, ya Watch Ad se FREE continue karo!";
+    $("overMsg").textContent = "🪙 Not enough coins (" + coins + "/" + COIN_CONTINUE + ") — tap +FREE above to watch an ad for coins, or use Watch Ad to continue FREE!";
     sfx.over();
   }
 };
@@ -545,7 +545,7 @@ $("btnEndGame").onclick = async () => {
 $("btnFreeCoins").onclick = () => {
   const last = store.get("lastFree", 0);
   const wait = 60 - Math.floor((Date.now() - last) / 1000);
-  if (wait > 0){ floatText("⏳ " + wait + "s baad phir FREE coins"); return; }
+  if (wait > 0){ floatText("⏳ FREE coins again in " + wait + "s"); return; }
   showAd(() => {
     coins += FREE_COINS; store.set("coins", coins);
     store.set("lastFree", Date.now());
