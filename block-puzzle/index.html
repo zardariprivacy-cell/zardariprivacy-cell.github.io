@@ -317,7 +317,7 @@ function gameOver(){
   $("finalScore").textContent = score;
   $("overMsg").textContent = score >= best && score > 0 ? "🏅 New BEST score!" :
     "Best: " + best + " • You reached Level " + level;
-  $("btnCoinContinue").innerHTML = "🪙 " + COIN_CONTINUE + " Coins<br><small>Continue (tumhare: " + coins + ")</small>";
+  $("btnCoinContinue").innerHTML = "🪙 " + COIN_CONTINUE + " Coins<br><small>Continue (yours: " + coins + ")</small>";
   $("ovOver").classList.add("open");
 }
 /* Rescue: clear the bottom 4 rows and deal fresh pieces */
