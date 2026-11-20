@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0B0E11">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>TradePulse AI — Binance Market Analyzer</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 512 512" width="30" height="30"><rect width="512" height="512" rx="112" fill="#1E2329"/><polyline points="56,300 168,300 216,196 286,380 338,256 372,300 456,300" fill="none" stroke="#F0B90B" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="456" cy="300" r="17" fill="#0ECB81"/></svg>
+    </span>
+    <span class="brand-text">Trade<b>Pulse</b> <em>AI</em></span>
+  </div>
+  <div class="live-pill" id="livePill"><span class="live-dot"></span><span id="liveText">LIVE</span></div>
+</header>
+
+<main>
+  <!-- ============ MARKET TAB ============ -->
+  <section id="tab-market" class="tab active">
+    <div class="card fng-card">
+      <div class="card-head">
+        <h2>Market Mood</h2>
+        <span class="card-sub">Fear &amp; Greed Index</span>
+      </div>
+      <div class="fng-body">
+        <svg id="fngGauge" viewBox="0 0 200 118" class="gauge" aria-hidden="true"></svg>
+        <div class="fng-readout">
+          <div class="fng-value" id="fngValue">--</div>
+          <div class="fng-label" id="fngLabel">Loading…</div>
+          <div class="fng-note" id="fngNote">How emotional the crypto market is right now. Extreme fear often comes before a bounce; extreme greed before a fall.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h2>Top Pairs <span class="muted">/ USDT</span></h2>
+      <span class="updated" id="marketUpdated">—</span>
+    </div>
+    <div class="card list-card">
+      <div id="marketList" class="coin-list">
+        <div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div>
+        <div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div>
+      </div>
+    </div>
+    <p class="fineprint">Prices from Binance public data · auto-refresh 15s · tap a coin to analyze it</p>
+  </section>
+
+  <!-- ============ ANALYZER TAB ============ -->
+  <section id="tab-analyzer" class="tab">
+    <div class="coin-chips" id="coinChips"></div>
+
+    <div class="tf-bar">
+      <div class="segmented" id="tfSegmented">
+        <button data-tf="15m">15m</button>
+        <button data-tf="1h" class="on">1h</button>
+        <button data-tf="4h">4h</button>
+        <button data-tf="1d">1d</button>
+      </div>
+      <button class="star-btn" id="analyzerStar" aria-label="Add to watchlist">
+        <svg viewBox="0 0 24 24" width="22" height="22"><path class="star-path" d="M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.5L12 17.5l-5.8 3.05 1.1-6.5-4.7-4.6 6.5-.95z"/></svg>
+      </button>
+    </div>
+
+    <div class="card signal-card">
+      <div class="signal-top">
+        <div>
+          <div class="signal-coin" id="signalCoin">BTC / USDT</div>
+          <div class="signal-price" id="signalPrice">—</div>
+          <div class="signal-change" id="signalChange">—</div>
+        </div>
+        <svg id="signalGauge" viewBox="0 0 200 118" class="gauge small" aria-hidden="true"></svg>
+      </div>
+      <div class="signal-verdict">
+        <span class="verdict-label" id="verdictLabel">Analyzing…</span>
+        <span class="verdict-score" id="verdictScore"></span>
+      </div>
+      <div class="signal-meter"><div class="signal-meter-fill" id="signalMeterFill"></div><div class="signal-meter-mid"></div></div>
+      <div class="meter-scale"><span>Strong Sell</span><span>Neutral</span><span>Strong Buy</span></div>
+    </div>
+
+    <div class="card chart-card">
+      <div class="card-head">
+        <h2>Chart</h2>
+        <div class="legend">
+          <span class="legend-item"><i class="sw ema20"></i>EMA 20</span>
+          <span class="legend-item"><i class="sw ema50"></i>EMA 50</span>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart"></canvas><div class="chart-loading" id="chartLoading">Loading chart…</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Why this signal?</h2><span class="card-sub">Every point explained</span></div>
+      <ul class="why-list" id="whyList"><li class="why-loading">Reading the indicators…</li></ul>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Key Levels</h2><span class="card-sub">Where price may bounce or break</span></div>
+      <div class="levels" id="levelsBox">
+        <div class="level-row"><span class="level-name res">Resistance</span><span class="level-val" id="resVal">—</span><span class="level-dist" id="resDist"></span></div>
+        <div class="level-bar"><div class="level-dot" id="levelDot"></div></div>
+        <div class="level-row"><span class="level-name sup">Support</span><span class="level-val" id="supVal">—</span><span class="level-dist" id="supDist"></span></div>
+      </div>
+    </div>
+
+    <p class="disclaimer">Analysis only — not financial advice. Crypto is high risk; never trade money you cannot afford to lose.</p>
+  </section>
+
+  <!-- ============ WATCHLIST TAB ============ -->
+  <section id="tab-watchlist" class="tab">
+    <div class="section-head"><h2>Watchlist</h2><span class="updated" id="watchUpdated"></span></div>
+    <div class="card list-card">
+      <div id="watchList" class="coin-list"></div>
+      <div id="watchEmpty" class="empty-state">
+        <svg viewBox="0 0 24 24" width="40" height="40"><path class="star-path empty" d="M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.5L12 17.5l-5.8 3.05 1.1-6.5-4.7-4.6 6.5-.95z"/></svg>
+        <p>No coins starred yet.</p>
+        <p class="muted">Tap the star on any coin in Market or Analyzer and it will live here.</p>
+      </div>
+    </div>
+    <p class="fineprint">Your watchlist is saved on this device only.</p>
+  </section>
+</main>
+
+<nav class="bottomnav">
+  <button class="nav-btn on" data-tab="market">
+    <svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-6m4 6V6m4 14v-9m4 9V3" stroke-linecap="round"/></svg>
+    <span>Market</span>
+  </button>
+  <button class="nav-btn" data-tab="analyzer">
+    <svg viewBox="0 0 24 24"><polyline points="2,14 7,14 10,6 14,18 17,10 19,14 22,14" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Analyzer</span>
+  </button>
+  <button class="nav-btn" data-tab="watchlist">
+    <svg viewBox="0 0 24 24"><path class="star-nav" d="M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.5L12 17.5l-5.8 3.05 1.1-6.5-4.7-4.6 6.5-.95z"/></svg>
+    <span>Watchlist</span>
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

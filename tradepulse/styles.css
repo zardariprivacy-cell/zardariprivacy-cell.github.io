@@ -1,0 +1,188 @@
+:root{
+  --bg:#0B0E11; --card:#161A1E; --card2:#1E2329; --line:#2B3139;
+  --yellow:#F0B90B; --green:#0ECB81; --red:#F6465D;
+  --text:#EAECEF; --muted:#848E9C; --radius:16px;
+  --nav-h:64px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scrollbar-color:var(--line) var(--bg)}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 12px);
+  max-width:860px; margin:0 auto;
+}
+b{color:var(--yellow); font-weight:800}
+.muted{color:var(--muted); font-weight:400}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky; top:0; z-index:30;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 16px;
+  background:rgba(11,14,17,.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex; align-items:center; gap:9px}
+.brand-mark{display:flex; border-radius:9px; overflow:hidden}
+.brand-text{font-size:19px; font-weight:600; letter-spacing:.2px}
+.brand-text em{font-style:normal; color:var(--yellow); font-weight:800}
+.live-pill{display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:1.2px;
+  color:var(--green); background:rgba(14,203,129,.1); border:1px solid rgba(14,203,129,.35);
+  padding:5px 10px; border-radius:99px}
+.live-pill.off{color:var(--red); background:rgba(246,70,93,.1); border-color:rgba(246,70,93,.35)}
+.live-dot{width:7px; height:7px; border-radius:50%; background:currentColor; animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* ---------- layout / cards ---------- */
+main{padding:14px 14px 4px}
+.tab{display:none}
+.tab.active{display:block; animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0; transform:translateY(4px)}to{opacity:1; transform:none}}
+.card{
+  background:linear-gradient(180deg,var(--card2),var(--card));
+  border:1px solid var(--line); border-radius:var(--radius);
+  padding:16px; margin-bottom:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,.35);
+}
+.card-head{display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:10px}
+.card-head h2, .section-head h2{font-size:16px; font-weight:700}
+.card-sub{font-size:12px; color:var(--muted)}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; margin:4px 2px 10px}
+.updated{font-size:11px; color:var(--muted)}
+.fineprint{font-size:11px; color:var(--muted); text-align:center; margin:2px 0 14px}
+.disclaimer{font-size:12px; color:var(--muted); text-align:center; border:1px dashed var(--line);
+  border-radius:12px; padding:10px 12px; margin-bottom:16px}
+
+/* ---------- fear & greed ---------- */
+.fng-body{display:flex; align-items:center; gap:8px}
+.gauge{width:52%; max-width:230px; flex:none}
+.fng-readout{flex:1; min-width:0}
+.fng-value{font-size:38px; font-weight:800; line-height:1}
+.fng-label{font-size:15px; font-weight:700; margin:3px 0 6px}
+.fng-note{font-size:11.5px; color:var(--muted); line-height:1.45}
+
+/* ---------- coin list ---------- */
+.list-card{padding:6px 0}
+.coin-row{
+  display:flex; align-items:center; gap:11px; width:100%;
+  background:none; border:none; border-bottom:1px solid rgba(43,49,57,.6);
+  padding:11px 14px; cursor:pointer; text-align:left; color:var(--text); font:inherit;
+}
+.coin-row:last-child{border-bottom:none}
+.coin-row:active{background:var(--card2)}
+.coin-badge{width:38px; height:38px; border-radius:50%; flex:none;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:15px; color:#0B0E11}
+.coin-main{flex:1; min-width:0}
+.coin-name{font-size:15px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.coin-pair{font-size:11.5px; color:var(--muted)}
+.coin-spark{width:64px; height:26px; flex:none}
+.coin-right{text-align:right; flex:none; min-width:86px}
+.coin-price{font-size:14.5px; font-weight:600; font-variant-numeric:tabular-nums}
+.coin-chg{font-size:12px; font-weight:700; font-variant-numeric:tabular-nums}
+.up{color:var(--green)} .down{color:var(--red)}
+.row-star{background:none; border:none; padding:6px 2px; cursor:pointer; flex:none}
+.row-star svg{display:block}
+.star-path{fill:none; stroke:var(--muted); stroke-width:1.6; stroke-linejoin:round}
+.star-path.on, .star-btn.on .star-path{fill:var(--yellow); stroke:var(--yellow)}
+.star-path.empty{stroke:var(--line)}
+.skeleton-row{height:60px; margin:8px 14px; border-radius:10px;
+  background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);
+  background-size:200% 100%; animation:shimmer 1.3s infinite}
+@keyframes shimmer{to{background-position:-200% 0}}
+.empty-state{text-align:center; padding:26px 18px 30px; display:none}
+.empty-state.show{display:block}
+.empty-state p{margin-top:8px; font-size:14px}
+.empty-state .muted{font-size:12.5px}
+
+/* ---------- analyzer ---------- */
+.coin-chips{display:flex; gap:8px; overflow-x:auto; padding:2px 2px 12px; scrollbar-width:none}
+.coin-chips::-webkit-scrollbar{display:none}
+.chip{flex:none; border:1px solid var(--line); background:var(--card); color:var(--muted);
+  border-radius:99px; padding:7px 14px; font-size:13.5px; font-weight:600; cursor:pointer; font-family:inherit}
+.chip.on{background:var(--yellow); border-color:var(--yellow); color:#0B0E11}
+.tf-bar{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px}
+.segmented{display:flex; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:3px; gap:2px}
+.segmented button{background:none; border:none; color:var(--muted); font:inherit; font-size:13px; font-weight:600;
+  padding:7px 15px; border-radius:9px; cursor:pointer}
+.segmented button.on{background:var(--card2); color:var(--yellow); box-shadow:inset 0 0 0 1px var(--line)}
+.star-btn{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:8px 10px; cursor:pointer}
+.star-btn .star-path{fill:none; stroke:var(--muted)}
+.star-btn.on .star-path{fill:var(--yellow); stroke:var(--yellow)}
+
+.signal-card{border-color:rgba(240,185,11,.35)}
+.signal-top{display:flex; justify-content:space-between; align-items:flex-start; gap:6px}
+.signal-coin{font-size:13px; color:var(--muted); font-weight:600; letter-spacing:.4px}
+.signal-price{font-size:27px; font-weight:800; font-variant-numeric:tabular-nums; margin:2px 0}
+.signal-change{font-size:13.5px; font-weight:700}
+.gauge.small{width:46%; max-width:190px}
+.signal-verdict{display:flex; align-items:baseline; gap:10px; margin-top:2px}
+.verdict-label{font-size:23px; font-weight:800}
+.verdict-score{font-size:13px; color:var(--muted); font-weight:600}
+.signal-meter{position:relative; height:9px; border-radius:99px; margin-top:12px;
+  background:linear-gradient(90deg,var(--red),#b06a3b,var(--line) 50%,#4d7d5f,var(--green))}
+.signal-meter-fill{position:absolute; top:0; bottom:0; border-radius:99px; background:rgba(234,236,239,.9);
+  transition:left .5s ease, width .5s ease}
+.signal-meter-mid{position:absolute; left:50%; top:-3px; bottom:-3px; width:2px; background:var(--bg); opacity:.7}
+.meter-scale{display:flex; justify-content:space-between; font-size:10.5px; color:var(--muted); margin-top:6px}
+
+.chart-wrap{position:relative}
+#chart{width:100%; height:250px; display:block}
+.chart-loading{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  color:var(--muted); font-size:13px; background:rgba(22,26,30,.6); border-radius:8px}
+.chart-loading.hide{display:none}
+.legend{display:flex; gap:12px; font-size:11.5px; color:var(--muted)}
+.legend-item{display:flex; align-items:center; gap:5px}
+.sw{width:14px; height:3px; border-radius:2px; display:inline-block}
+.sw.ema20{background:var(--yellow)} .sw.ema50{background:#B18CFF}
+
+.why-list{list-style:none}
+.why-list li{display:flex; gap:10px; padding:9px 0; border-bottom:1px solid rgba(43,49,57,.6); font-size:13.5px; line-height:1.5}
+.why-list li:last-child{border-bottom:none}
+.why-dot{width:9px; height:9px; border-radius:50%; flex:none; margin-top:6px}
+.why-dot.bull{background:var(--green)} .why-dot.bear{background:var(--red)} .why-dot.flat{background:var(--muted)}
+.why-text{flex:1}
+.why-pts{font-weight:800; font-variant-numeric:tabular-nums; flex:none}
+.why-loading{color:var(--muted)}
+
+.levels{padding-top:2px}
+.level-row{display:flex; align-items:baseline; gap:10px; padding:5px 0}
+.level-name{font-size:12px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; width:92px; flex:none}
+.level-name.res{color:var(--red)} .level-name.sup{color:var(--green)}
+.level-val{font-size:16px; font-weight:700; font-variant-numeric:tabular-nums}
+.level-dist{font-size:12px; color:var(--muted); margin-left:auto}
+.level-bar{position:relative; height:6px; border-radius:99px; margin:8px 0;
+  background:linear-gradient(90deg,var(--green),var(--line),var(--red))}
+.level-dot{position:absolute; top:50%; width:14px; height:14px; border-radius:50%;
+  background:var(--yellow); border:2.5px solid var(--bg); transform:translate(-50%,-50%);
+  box-shadow:0 0 0 1px var(--yellow); transition:left .5s ease}
+
+/* ---------- bottom nav ---------- */
+.bottomnav{
+  position:fixed; left:0; right:0; bottom:0; z-index:40;
+  height:calc(var(--nav-h) + env(safe-area-inset-bottom));
+  padding-bottom:env(safe-area-inset-bottom);
+  display:flex; background:rgba(22,26,30,.97); backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);
+  max-width:860px; margin:0 auto;
+}
+.nav-btn{flex:1; background:none; border:none; color:var(--muted); cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+  font:inherit; font-size:11px; font-weight:600}
+.nav-btn svg{width:23px; height:23px; fill:none; stroke:currentColor; stroke-width:1.9}
+.nav-btn svg .star-nav{fill:none; stroke:currentColor}
+.nav-btn.on{color:var(--yellow)}
+.nav-btn.on svg .star-nav{fill:var(--yellow); stroke:var(--yellow)}
+
+.toast{position:fixed; left:50%; bottom:calc(var(--nav-h) + 18px); transform:translateX(-50%) translateY(20px);
+  background:var(--card2); border:1px solid var(--line); color:var(--text);
+  font-size:12.5px; padding:9px 15px; border-radius:99px; opacity:0; pointer-events:none;
+  transition:all .3s ease; z-index:60; white-space:nowrap; box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+
+@media (min-width:640px){
+  #chart{height:320px}
+  .fng-value{font-size:44px}
+  main{padding:18px 18px 4px}
+}
