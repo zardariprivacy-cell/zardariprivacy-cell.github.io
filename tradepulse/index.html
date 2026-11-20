@@ -43,8 +43,34 @@
       </div>
     </div>
 
+    <div class="stats-strip" id="statsStrip">
+      <div class="stat"><span class="stat-val" id="statPairs">—</span><span class="stat-name">Pairs</span></div>
+      <div class="stat"><span class="stat-val up" id="statGainers">—</span><span class="stat-name">Gainers</span></div>
+      <div class="stat"><span class="stat-val down" id="statLosers">—</span><span class="stat-name">Losers</span></div>
+      <div class="stat"><span class="stat-val" id="statVol">—</span><span class="stat-name">24h Volume</span></div>
+    </div>
+
+    <div class="strip-block">
+      <div class="strip-title up">▲ Top Gainers <span class="muted">(24h, volume &gt; $1M)</span></div>
+      <div class="strip-row" id="gainersStrip"><span class="muted small">Loading…</span></div>
+    </div>
+    <div class="strip-block">
+      <div class="strip-title down">▼ Top Losers <span class="muted">(24h, volume &gt; $1M)</span></div>
+      <div class="strip-row" id="losersStrip"><span class="muted small">Loading…</span></div>
+    </div>
+
+    <div class="market-tools">
+      <input id="searchInput" type="search" placeholder="Search all coins…" autocomplete="off">
+      <div class="sort-chips" id="sortChips">
+        <button data-sort="volume" class="on">Volume</button>
+        <button data-sort="gainers">Gainers</button>
+        <button data-sort="losers">Losers</button>
+        <button data-sort="az">A–Z</button>
+      </div>
+    </div>
+
     <div class="section-head">
-      <h2>Top Pairs <span class="muted">/ USDT</span></h2>
+      <h2>All Pairs <span class="muted">/ USDT</span></h2>
       <span class="updated" id="marketUpdated">—</span>
     </div>
     <div class="card list-card">
@@ -53,7 +79,10 @@
         <div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div>
       </div>
     </div>
-    <p class="fineprint">Prices from Binance public data · auto-refresh 15s · tap a coin to analyze it</p>
+    <div class="showall-wrap" id="showAllWrap" hidden>
+      <button class="ghost-btn" id="showAllBtn">Show all pairs</button>
+    </div>
+    <p class="fineprint" id="marketCount">Prices from Binance public data · auto-refresh 15s · tap a coin to analyze it</p>
   </section>
 
   <!-- ============ ANALYZER TAB ============ -->
@@ -66,6 +95,7 @@
         <button data-tf="1h" class="on">1h</button>
         <button data-tf="4h">4h</button>
         <button data-tf="1d">1d</button>
+        <button data-tf="1w">1w</button>
       </div>
       <button class="star-btn" id="analyzerStar" aria-label="Add to watchlist">
         <svg viewBox="0 0 24 24" width="22" height="22"><path class="star-path" d="M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.5L12 17.5l-5.8 3.05 1.1-6.5-4.7-4.6 6.5-.95z"/></svg>
@@ -74,10 +104,13 @@
 
     <div class="card signal-card">
       <div class="signal-top">
-        <div>
-          <div class="signal-coin" id="signalCoin">BTC / USDT</div>
-          <div class="signal-price" id="signalPrice">—</div>
-          <div class="signal-change" id="signalChange">—</div>
+        <div class="signal-id">
+          <span id="signalLogo" class="signal-logo"></span>
+          <div>
+            <div class="signal-coin" id="signalCoin">BTC / USDT</div>
+            <div class="signal-price" id="signalPrice">—</div>
+            <div class="signal-change" id="signalChange">—</div>
+          </div>
         </div>
         <svg id="signalGauge" viewBox="0 0 200 118" class="gauge small" aria-hidden="true"></svg>
       </div>
@@ -87,6 +120,11 @@
       </div>
       <div class="signal-meter"><div class="signal-meter-fill" id="signalMeterFill"></div><div class="signal-meter-mid"></div></div>
       <div class="meter-scale"><span>Strong Sell</span><span>Neutral</span><span>Strong Buy</span></div>
+      <div class="range-block">
+        <div class="range-head"><span>24h Low <span class="range-val" id="rangeLow">—</span></span><span>24h High <span class="range-val" id="rangeHigh">—</span></span></div>
+        <div class="range-bar"><div class="range-dot" id="rangeDot"></div></div>
+        <div class="range-vol">24h Volume <span class="range-val" id="rangeVol">—</span></div>
+      </div>
     </div>
 
     <div class="card chart-card">
@@ -114,6 +152,28 @@
       </div>
     </div>
 
+    <div class="card">
+      <div class="card-head"><h2>Converter</h2><span class="card-sub">At the live price</span></div>
+      <div class="conv-row">
+        <input id="convAmount" type="number" inputmode="decimal" min="0" step="any" value="1">
+        <span class="conv-coin" id="convCoinLabel">BTC</span>
+      </div>
+      <div class="conv-out">
+        <div class="conv-line"><span class="conv-cur">USD</span><span class="conv-val" id="convUsd">—</span></div>
+        <div class="conv-line" id="convPkrRow"><span class="conv-cur">PKR</span><span class="conv-val" id="convPkr">—</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Price Alerts</h2><span class="card-sub" id="alertPrice"></span></div>
+      <div class="conv-row">
+        <input id="alertTarget" type="number" inputmode="decimal" min="0" step="any" placeholder="Target price (USD)">
+        <button class="primary-btn" id="alertBtn">Set alert</button>
+      </div>
+      <p class="muted small">Checked every 15 seconds while this page is open. When the price crosses your target you get a message here — and a browser notification too, if you allow it. Direction (above / below) is picked automatically from the current price.</p>
+      <div id="alertList" class="alert-list"></div>
+    </div>
+
     <p class="disclaimer">Analysis only — not financial advice. Crypto is high risk; never trade money you cannot afford to lose.</p>
   </section>
 
@@ -130,6 +190,32 @@
     </div>
     <p class="fineprint">Your watchlist is saved on this device only.</p>
   </section>
+
+  <!-- ============ PORTFOLIO TAB ============ -->
+  <section id="tab-portfolio" class="tab">
+    <div class="card pf-total-card">
+      <div class="card-sub">Paper portfolio — practice only, not real money.</div>
+      <div class="pf-total" id="pfTotalValue">$0.00</div>
+      <div class="pf-pl" id="pfTotalPl">Add a holding below to start practicing.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Add a holding</h2><span class="card-sub">Practice trade</span></div>
+      <label class="fld"><span>Coin</span><select id="pfCoin"></select></label>
+      <label class="fld"><span>Quantity</span><input id="pfQty" type="number" inputmode="decimal" min="0" step="any" placeholder="e.g. 0.5"></label>
+      <label class="fld"><span>Buy price (USD)</span><input id="pfBuy" type="number" inputmode="decimal" min="0" step="any"></label>
+      <button class="primary-btn wide" id="pfAdd">Add holding</button>
+    </div>
+
+    <div class="card list-card">
+      <div id="pfList"></div>
+      <div id="pfEmpty" class="empty-state show">
+        <p>No holdings yet.</p>
+        <p class="muted">Add a practice buy above and watch its profit / loss move with the live price.</p>
+      </div>
+    </div>
+    <p class="fineprint">Saved on this device only. Profit / loss is practice math on live Binance prices — not real money.</p>
+  </section>
 </main>
 
 <nav class="bottomnav">
@@ -144,6 +230,10 @@
   <button class="nav-btn" data-tab="watchlist">
     <svg viewBox="0 0 24 24"><path class="star-nav" d="M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.5L12 17.5l-5.8 3.05 1.1-6.5-4.7-4.6 6.5-.95z"/></svg>
     <span>Watchlist</span>
+  </button>
+  <button class="nav-btn" data-tab="portfolio">
+    <svg viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H19a1 1 0 0 1 1 1v2" stroke-linecap="round"/><path d="M3 7.5V17A2.5 2.5 0 0 0 5.5 19.5H20a1 1 0 0 0 1-1V10a1 1 0 0 0-1-1H5.5A2.5 2.5 0 0 1 3 6.5z"/><circle cx="16.6" cy="14.2" r="1.15"/></svg>
+    <span>Portfolio</span>
   </button>
 </nav>
 
