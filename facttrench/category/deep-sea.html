@@ -20,6 +20,8 @@
 html[data-theme="light"]{--bg:#eef6fc;--bg2:#ffffff;--card:#ffffff;--line:#cfe3f2;--txt:#0d2c44;--mut:#51748f;--acc:#0a86c8;--acc2:#0aa873;--hdr:rgba(255,255,255,.88);--shadow:0 10px 24px rgba(13,60,100,.12)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:radial-gradient(1200px 600px at 80% -10%,var(--bg2) 0%,var(--bg) 55%);color:var(--txt);font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.65;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:url("https://upload.wikimedia.org/wikipedia/commons/9/96/Hydrothermal_vent%2C_Mid-Cayman_Rise_%28Expl6955_9664075828%29.jpg") center center/cover no-repeat;opacity:.15}
+html[data-theme="light"] body::before{opacity:.06}
 a{color:var(--acc);text-decoration:none}
 header{position:sticky;top:0;backdrop-filter:blur(10px);background:var(--hdr);border-bottom:1px solid var(--line);z-index:50}
 .nav{max-width:1080px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;gap:10px;flex-wrap:wrap}
@@ -122,7 +124,7 @@ form.cform input,form.cform textarea{width:100%;padding:12px 14px;border-radius:
 <div><h4>Categories</h4><a href="../category/deep-sea.html">Deep Sea</a>
 <a href="../category/ocean-life.html">Ocean Life</a></div>
 <div><h4>Site</h4><a href="../about.html">About</a><a href="../contact.html">Contact</a><a href="../privacy-policy.html">Privacy Policy</a><a href="../terms.html">Terms of Use</a><a href="../disclaimer.html">Disclaimer</a></div>
-</div><div class="fbot">© 2026 FactTrench. Facts checked against public scientific sources (NOAA, universities, journals).</div></footer>
+</div><div class="fbot">© 2026 FactTrench. Facts checked against public scientific sources (NOAA, universities, journals).<br>Background photo: NOAA Ocean Exploration, via Wikimedia Commons (public domain).</div></footer>
 <div id="consent"><p>We use cookies to improve your experience and to show ads that keep FactTrench free. By clicking Accept, you agree to our <a href="../privacy-policy.html">Privacy Policy</a>.</p><button class="btn" onclick="ftConsentOk()">Accept</button></div>
 <button id="topbtn" onclick="ftTop()" aria-label="Back to top">↑</button>
 <script>
