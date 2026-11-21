@@ -4,6 +4,8 @@
 <title>Page Not Found | FactTrench</title>
 <meta name="description" content="That page drifted into the deep.">
 <meta name="theme-color" content="#04101f">
+<link rel="preconnect" href="https://upload.wikimedia.org" crossorigin>
+<link rel="dns-prefetch" href="https://quge5.com">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23071a30'/%3E%3Cpath d='M8 58q11-12 21 0t21 0 21 0 21 0' stroke='%2337c8f5' stroke-width='8' fill='none' stroke-linecap='round'/%3E%3Cpath d='M8 74q11-12 21 0t21 0 21 0 21 0' stroke='%232ee6a8' stroke-width='8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="alternate" type="application/rss+xml" title="FactTrench RSS" href="https://zardariprivacy-cell.github.io/facttrench/feed.xml">
 <link rel="canonical" href="https://zardariprivacy-cell.github.io/facttrench/404.html">
@@ -20,7 +22,7 @@
 html[data-theme="light"]{--bg:#eef6fc;--bg2:#ffffff;--card:#ffffff;--line:#cfe3f2;--txt:#0d2c44;--mut:#51748f;--acc:#0a86c8;--acc2:#0aa873;--hdr:rgba(255,255,255,.88);--shadow:0 10px 24px rgba(13,60,100,.12)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:radial-gradient(1200px 600px at 80% -10%,var(--bg2) 0%,var(--bg) 55%);color:var(--txt);font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.65;min-height:100vh}
-body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:url("https://upload.wikimedia.org/wikipedia/commons/9/96/Hydrothermal_vent%2C_Mid-Cayman_Rise_%28Expl6955_9664075828%29.jpg") center center/cover no-repeat;opacity:.15}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:url("https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/Hydrothermal_vent%2C_Mid-Cayman_Rise_%28Expl6955_9664075828%29.jpg/1280px-Hydrothermal_vent%2C_Mid-Cayman_Rise_%28Expl6955_9664075828%29.jpg") center center/cover no-repeat;opacity:.15}
 html[data-theme="light"] body::before{opacity:.06}
 a{color:var(--acc);text-decoration:none}
 header{position:sticky;top:0;backdrop-filter:blur(10px);background:var(--hdr);border-bottom:1px solid var(--line);z-index:50}
@@ -109,14 +111,33 @@ form.cform input,form.cform textarea{width:100%;padding:12px 14px;border-radius:
 .sresults{margin-top:18px;display:grid;gap:12px}
 .sresults a{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;color:var(--txt)}
 .sresults p{color:var(--mut);font-size:14px}
+.dive{position:relative;height:2600px;border-radius:18px;overflow:hidden;border:1px solid var(--line);margin-top:22px;background:linear-gradient(180deg,#8fd0e8 0%,#2e7fb8 14%,#14507e 30%,#0a3358 46%,#051f3a 62%,#020c1a 80%,#000000 100%);box-shadow:var(--shadow)}
+.zone{position:absolute;left:0;right:0;border-top:1px dashed rgba(255,255,255,.28)}
+.zone .zt{position:absolute;top:10px;left:16px;color:rgba(255,255,255,.92);font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+.zone .zf{position:absolute;top:32px;left:16px;color:rgba(255,255,255,.65);font-size:12.5px;max-width:280px;line-height:1.45}
+.dline{position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(255,255,255,.35)}
+.gauge{position:sticky;top:74px;z-index:6;display:flex;justify-content:center;pointer-events:none}
+.gauge .gbox{background:rgba(2,12,26,.88);border:1px solid rgba(94,200,255,.45);border-radius:99px;padding:9px 22px;color:#eaf6ff;font-size:15px;font-weight:700;backdrop-filter:blur(6px)}
+.gauge .gbox b{color:#2ee6a8}
+.stop{position:absolute;width:50%;padding:0 30px;transform:translateY(-50%);z-index:2}
+.stop .dot{position:absolute;top:50%;width:15px;height:15px;border-radius:50%;background:#37c8f5;border:3px solid #fff;transform:translateY(-50%);box-shadow:0 0 14px rgba(55,200,245,.8)}
+.stop.lft{left:0;text-align:right}.stop.lft .dot{right:-8px}
+.stop.rgt{left:50%}.stop.rgt .dot{left:-8px}
+.stop .box{display:inline-block;background:rgba(2,12,26,.82);border:1px solid rgba(94,200,255,.35);border-radius:14px;padding:12px 16px;color:#eaf6ff;max-width:350px;text-align:left}
+.stop h3{font-size:18px;margin:3px 0 4px;color:#fff}.stop h3 a{color:#fff}
+.stop p{font-size:14px;color:#b9d6ea;margin:0;line-height:1.5}
+.stop .dep{font-size:12px;font-weight:800;color:#2ee6a8;letter-spacing:1.2px}
+.xbanner{display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:linear-gradient(120deg,#0a2c4f,#02101f);border:1px solid var(--acc);border-radius:18px;padding:24px 26px;margin-top:26px;color:#eaf6ff;box-shadow:var(--shadow)}
+.xbanner h2{font-size:24px;margin-bottom:4px}.xbanner p{color:#9db8cc;max-width:560px}
+@media(max-width:640px){.dive{height:2400px}.dline{left:18px}.stop{width:100%;left:0!important;padding:0 12px 0 40px;text-align:left}.stop .dot{left:11px!important;right:auto!important}.stop .box{max-width:100%}.zone .zf{display:none}}
 @media(max-width:640px){.hero h1{font-size:32px}article h1{font-size:29px}.nav nav a{margin-left:12px}}
 </style></head><body><div id="progress"></div><header><div class="nav"><a class="logo" href="./">Fact<span>Trench</span></a>
-<nav><a href="./">Home</a><a href="./categories.html">Categories</a><a href="./archive.html">Archive</a><a href="./about.html">About</a><a href="./contact.html">Contact</a><a href="./search.html">Search</a><button class="iconbtn" onclick="ftTheme()" aria-label="Toggle light or dark mode">Theme</button></nav></div></header><main class="wrap">
+<nav><a href="./">Home</a><a href="./explore.html">Explore the Deep</a><a href="./categories.html">Categories</a><a href="./archive.html">Archive</a><a href="./about.html">About</a><a href="./contact.html">Contact</a><a href="./search.html">Search</a><button class="iconbtn" onclick="ftTheme()" aria-label="Toggle light or dark mode">Theme</button></nav></div></header><main class="wrap">
 <section class="hero" style="text-align:center"><h1>404 — <em>lost in the deep</em></h1>
 <p style="margin-left:auto;margin-right:auto">This page sank beyond reach. Even our sonar cannot find it.</p>
 <p style="margin-top:20px"><a class="btn" href="./">Back to the surface (Home)</a></p></section></main><footer><div class="fcols">
 <div><h4>FactTrench</h4><p>Amazing facts from the deep, and beyond. One short, true story every day — checked against public scientific sources. Sister project of the Trench Borne YouTube channel.</p></div>
-<div><h4>Explore</h4><a href="./">Home</a><a href="./categories.html">Categories</a><a href="./archive.html">Archive</a><a href="./search.html">Search</a><a href="./feed.xml">RSS Feed</a></div>
+<div><h4>Explore</h4><a href="./">Home</a><a href="./explore.html">Explore the Deep</a><a href="./categories.html">Categories</a><a href="./archive.html">Archive</a><a href="./search.html">Search</a><a href="./feed.xml">RSS Feed</a></div>
 <div><h4>Categories</h4><a href="./category/deep-sea.html">Deep Sea</a>
 <a href="./category/ocean-life.html">Ocean Life</a></div>
 <div><h4>Site</h4><a href="./about.html">About</a><a href="./contact.html">Contact</a><a href="./privacy-policy.html">Privacy Policy</a><a href="./terms.html">Terms of Use</a><a href="./disclaimer.html">Disclaimer</a></div>
