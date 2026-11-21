@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptLens — AI Detector: How Much of This Script Is AI vs Human?</title>
+<meta name="description" content="Free AI detector for scripts, essays and articles. Paste any text and ScriptLens analyses writing patterns to estimate how much looks AI-generated and how much looks genuinely human. Private — your text never leaves your browser.">
+<link rel="canonical" href="https://zardariprivacy-cell.github.io/scriptlens/">
+<meta property="og:type" content="website"><meta property="og:title" content="ScriptLens — AI or Human? Check Any Script Free">
+<meta property="og:description" content="Paste a script or article and see an instant estimate: how much reads AI-generated, how much reads human — with the signals shown, sentence by sentence.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="robots" content="index, follow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='42' cy='42' r='26' fill='none' stroke='%2338e1ff' stroke-width='9'/%3E%3Cline x1='62' y1='62' x2='90' y2='90' stroke='%23a78bfa' stroke-width='11' stroke-linecap='round'/%3E%3C/svg%3E">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"ScriptLens AI Detector","url":"https://zardariprivacy-cell.github.io/scriptlens/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0"},"description":"Free AI text detector that estimates how much of a script or article reads as AI-generated versus human-written, using writing-pattern analysis."}</script>
+<style>
+:root{--bg:#060a13;--panel:rgba(16,26,44,.78);--line:rgba(96,200,255,.16);--txt:#eaf4ff;--mut:#93a9c4;--cy:#38e1ff;--vi:#a78bfa;--gr:#2ee6a8;--am:#ffc857;--rd:#ff6b81;--shadow:0 14px 40px rgba(0,0,0,.45)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(1000px 500px at 85% -10%,#0d2140 0%,var(--bg) 55%),radial-gradient(800px 400px at -10% 30%,#160b2e 0%,transparent 60%);color:var(--txt);font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.65;min-height:100vh}
+a{color:var(--cy);text-decoration:none}
+header{position:sticky;top:0;backdrop-filter:blur(10px);background:rgba(6,10,19,.85);border-bottom:1px solid var(--line);z-index:50}
+.nav{max-width:1060px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:13px 20px}
+.logo{font-size:23px;font-weight:800;color:var(--txt)}.logo span{background:linear-gradient(90deg,var(--cy),var(--vi));-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav nav a{color:var(--mut);margin-left:18px;font-size:15px}.nav nav a:hover{color:var(--cy)}
+.wrap{max-width:1060px;margin:auto;padding:30px 20px 60px}
+.hero{text-align:center;padding:38px 0 8px}
+.hero h1{font-size:42px;line-height:1.15;font-weight:900}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--cy),var(--vi));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--mut);font-size:18px;margin:14px auto 0;max-width:640px}
+.tool{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px;margin-top:28px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.tool.scanning::after{content:"";position:absolute;left:0;right:0;height:90px;top:-90px;background:linear-gradient(180deg,transparent,rgba(56,225,255,.16),transparent);animation:scan 1.1s linear infinite;pointer-events:none}
+@keyframes scan{to{transform:translateY(900px)}}
+textarea{width:100%;min-height:190px;background:rgba(4,10,20,.65);border:1px solid var(--line);border-radius:14px;color:var(--txt);font-size:16px;line-height:1.6;padding:16px;resize:vertical;outline:none;font-family:inherit}
+textarea:focus{border-color:var(--cy)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.btn{background:linear-gradient(90deg,var(--cy),var(--vi));color:#06121f;font-weight:800;padding:12px 28px;border-radius:99px;border:none;cursor:pointer;font-size:16px}
+.btn:disabled{opacity:.55;cursor:wait}
+.ghost{background:transparent;border:1px solid var(--line);color:var(--mut);padding:11px 18px;border-radius:99px;cursor:pointer;font-size:14px;font-weight:600}
+.ghost:hover{color:var(--txt);border-color:var(--cy)}
+.count{margin-left:auto;color:var(--mut);font-size:14px}
+#results{display:none;margin-top:26px}
+.gaugebox{display:flex;gap:26px;flex-wrap:wrap;align-items:center;background:rgba(4,10,20,.5);border:1px solid var(--line);border-radius:16px;padding:22px}
+.gauge{flex:none;text-align:center}
+.gauge svg{display:block}
+.verdict{font-size:26px;font-weight:900;line-height:1.25}
+.vsub{color:var(--mut);margin-top:6px;max-width:520px}
+.split{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}
+.split .cell{flex:1;min-width:150px;border-radius:14px;padding:14px 16px;border:1px solid var(--line)}
+.split .big{font-size:32px;font-weight:900}
+.ai-c{color:var(--rd)}.hu-c{color:var(--gr)}
+.bar{height:10px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;border-radius:99px}
+h2.sec{font-size:26px;margin:36px 0 6px}
+.sub{color:var(--mut);max-width:720px}
+.sig{margin-top:14px;display:grid;gap:10px}
+.sigrow{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 18px}
+.sigrow .top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sigrow .name{font-weight:700}.sigrow .val{font-weight:800}
+.sigrow p{color:var(--mut);font-size:14px;margin-top:4px}
+.heat{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-top:14px;font-size:16.5px;line-height:1.9}
+.heat span{border-radius:6px;padding:1px 3px}
+.h-hu{background:rgba(46,230,168,.14)}.h-mid{background:rgba(255,200,87,.16)}.h-ai{background:rgba(255,107,129,.18)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--mut);font-size:13.5px;margin-top:10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.fchip{border:1px solid rgba(255,107,129,.45);color:#ffb3bf;background:rgba(255,107,129,.08);border-radius:99px;padding:5px 13px;font-size:13.5px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+.stat .n{font-size:24px;font-weight:900}.stat .l{color:var(--mut);font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+.card h3{margin-bottom:6px}.card p{color:var(--mut);font-size:15px}
+details{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 18px;margin-top:10px}
+summary{cursor:pointer;font-weight:700}
+details p{color:var(--mut);margin-top:8px;font-size:15px}
+.note{border:1px solid rgba(255,200,87,.4);background:rgba(255,200,87,.07);border-radius:14px;padding:16px 18px;margin-top:26px;color:#ffe1a1;font-size:15px}
+footer{border-top:1px solid var(--line);color:var(--mut);padding:28px 20px;text-align:center;font-size:14px}
+footer a{color:var(--mut);margin:0 8px}footer a:hover{color:var(--cy)}
+@media(max-width:640px){.hero h1{font-size:30px}.count{margin-left:0}}
+</style></head>
+<body>
+<header><div class="nav"><a class="logo" href="./">Script<span>Lens</span></a><nav><a href="#how">How it works</a><a href="#signals">Signals</a><a href="#faq">FAQ</a><a href="about.html">About</a></nav></div></header>
+<main class="wrap">
+<section class="hero"><h1>AI or human? <em>Check any script.</em></h1>
+<p>Paste a YouTube script, essay, article or post. ScriptLens reads the writing patterns and estimates how much looks AI-generated — and how much looks genuinely human. Free, instant, and private: your text never leaves your browser.</p></section>
+
+<div class="tool" id="toolbox">
+<textarea id="input" placeholder="Paste the script or text you want to check here… (at least 50 words works best)"></textarea>
+<div class="controls">
+<button class="btn" id="analyze">Analyze text</button>
+<button class="ghost" id="sampleAi">Try an AI sample</button>
+<button class="ghost" id="sampleHu">Try a human sample</button>
+<button class="ghost" id="clear">Clear</button>
+<span class="count" id="wcount">0 words</span>
+</div>
+
+<div id="results">
+<div class="gaugebox">
+<div class="gauge">
+<svg width="210" height="124" viewBox="0 0 210 124"><path d="M15 115 A90 90 0 0 1 195 115" fill="none" stroke="rgba(255,255,255,.09)" stroke-width="17" stroke-linecap="round"/><path id="arc" d="M15 115 A90 90 0 0 1 195 115" fill="none" stroke="url(#gg)" stroke-width="17" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="283"/><defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2ee6a8"/><stop offset=".5" stop-color="#ffc857"/><stop offset="1" stop-color="#ff6b81"/></linearGradient></defs><text id="arcpct" x="105" y="98" text-anchor="middle" font-size="37" font-weight="900" fill="#eaf4ff">–</text><text x="105" y="118" text-anchor="middle" font-size="11.5" fill="#93a9c4">AI SCORE</text></svg>
+</div>
+<div style="flex:1;min-width:250px">
+<div class="verdict" id="verdict">—</div>
+<p class="vsub" id="vsub"></p>
+<div class="split">
+<div class="cell"><div class="big ai-c" id="aipct">–</div><div style="color:var(--mut)">looks AI-generated</div><div class="bar"><i id="aibar" style="background:var(--rd);width:0%"></i></div></div>
+<div class="cell"><div class="big hu-c" id="hupct">–</div><div style="color:var(--mut)">looks human-written</div><div class="bar"><i id="hubar" style="background:var(--gr);width:0%"></i></div></div>
+</div>
+</div>
+</div>
+
+<h2 class="sec">Why it scored that way</h2>
+<p class="sub">No single trick decides it — ScriptLens weighs seven writing signals. Here is what each one found in your text:</p>
+<div class="sig" id="signals"></div>
+
+<h2 class="sec">Sentence by sentence</h2>
+<p class="sub">Every sentence, coloured by how AI-like its pattern looks. Tap or hover is not needed — the story is in the colours: solid red blocks usually mean machine-polished text; a human mess is mostly green.</p>
+<div class="heat" id="heat"></div>
+<div class="legend"><span><i style="background:rgba(46,230,168,.5)"></i>Human-like</span><span><i style="background:rgba(255,200,87,.55)"></i>Mixed</span><span><i style="background:rgba(255,107,129,.55)"></i>AI-like</span></div>
+<div id="phrasebox"></div>
+
+<h2 class="sec">Text statistics</h2>
+<div class="stats" id="stats"></div>
+</div>
+</div>
+
+<h2 class="sec" id="how">How ScriptLens works</h2>
+<div class="cards">
+<div class="card"><h3>1. You paste the text</h3><p>A script, essay, article, caption — anything. Analysis happens entirely on your device, in this page. Nothing is uploaded, stored or shared.</p></div>
+<div class="card"><h3>2. We read the rhythm</h3><p>AI writing has a fingerprint: even sentence lengths, polished transitions, favourite phrases, almost no contractions or personal voice. Human writing is messier — and that mess is measurable.</p></div>
+<div class="card"><h3>3. You get the split</h3><p>Seven signals combine into one estimate of AI-written versus human-written share, with the evidence shown sentence by sentence — never just a bare number.</p></div>
+</div>
+
+<h2 class="sec" id="signals">The seven signals</h2>
+<div class="cards">
+<div class="card"><h3>Sentence rhythm (burstiness)</h3><p>Humans write a long sentence, then three short ones. AI tends to produce sentences of suspiciously similar length, one after another.</p></div>
+<div class="card"><h3>AI's favourite phrases</h3><p>"Delve", "furthermore", "in today's fast-paced world", "plays a crucial role"… Language models lean on the same polished phrases again and again.</p></div>
+<div class="card"><h3>Signpost stuffing</h3><p>Moreover, additionally, in conclusion — heavy use of formal transition words is a classic machine-polish pattern.</p></div>
+<div class="card"><h3>Contractions</h3><p>People write "don't", "it's", "we're". AI defaults to the full, formal "do not", "it is", "we are" far more often.</p></div>
+<div class="card"><h3>Personal voice</h3><p>I, you, we — plus questions, asides and opinions. Text that talks like a person usually is one.</p></div>
+<div class="card"><h3>Repetitive openings</h3><p>When sentence after sentence starts with "The…", "It…", "This…", a template is probably doing the writing.</p></div>
+</div>
+
+<h2 class="sec" id="faq">Frequently asked questions</h2>
+<details><summary>How accurate is this AI detector?</summary><p>It is an estimate, not a verdict. ScriptLens reads the same surface patterns most detectors start from, and it is good at spotting unedited, copy-pasted AI text. But heavily edited AI text can look human, and very formal human writing (legal, academic) can look machine-made. Never use any detector's score alone to accuse someone — use it as a signal, then read the text yourself.</p></details>
+<details><summary>Can it detect ChatGPT, Claude or Gemini text?</summary><p>It detects the patterns those tools share — even rhythm, polished transitions, favourite phrases — rather than any one tool's watermark. Fresh, unedited output from any major AI writer scores high; the more a human edits, the more human it reads.</p></details>
+<details><summary>Is my text uploaded or saved?</summary><p>No. The analysis runs 100% in your browser with JavaScript. Close the tab and the text is gone. There is no server, no account and no database behind this page.</p></details>
+<details><summary>Why did my own writing score as AI?</summary><p>Formal, careful writing — essays, reports, non-native English written very correctly — often shares patterns with AI output: even sentences, few contractions, formal transitions. A high score means "this reads polished and regular", not "you cheated".</p></details>
+<details><summary>How much text should I paste?</summary><p>At least 50 words for a meaningful reading; 150–1,000 words is the sweet spot. Very short texts do not carry enough rhythm to judge.</p></details>
+
+<div class="note"><strong>Honest note:</strong> no AI detector on Earth is 100% accurate — including this one. ScriptLens gives you a transparent estimate and shows its evidence, so you can judge for yourself. Treat the score as a strong hint, never as proof.</div>
+</main>
+<footer>© 2026 ScriptLens — free AI text detector. <a href="about.html">About</a> · <a href="privacy.html">Privacy</a> · <a href="./">Detector</a><br>Analysis runs entirely in your browser. Your text is never uploaded.</footer>
+<script>
+// === CORE START ===
+var AI_PHRASES=["delve","furthermore","moreover","in conclusion","it's important to note","it is important to note","in today's fast-paced world","in the ever-evolving","ever-evolving landscape","when it comes to","plays a crucial role","plays a vital role","plays a significant role","crucial role","in summary","additionally","notably","in essence","the realm of","a testament to","it goes without saying","needless to say","at the end of the day","ever-changing","game-changer","game changer","cutting-edge","cutting edge","state-of-the-art","harness the power","unlock the potential","unlock its full potential","elevate your","embark on","in light of","it is worth noting","it's worth noting","as a result","consequently","nevertheless","nonetheless","in addition","firstly","secondly","on the other hand","in contrast","in particular","generally speaking","landscape of","world of","dive into","delving into","boasts a","serves as a","acts as a","offers a wide range","wide range of","designed to help","helps you","whether you're","whether you are","look no further","in this article","in this video","by the end of this","let's explore","let us explore","when it comes down to","the key to","one of the most important","it is crucial","it's crucial","essential for","vital for","significant impact","profound impact","rich history","rich culture","nestled in","located in the heart of","in the heart of"];
+var TRANSITIONS=["furthermore","moreover","additionally","in conclusion","in summary","consequently","nevertheless","nonetheless","however","therefore","thus","hence","overall","ultimately","in addition","on the other hand","in contrast","for example","for instance","in particular","specifically","meanwhile","subsequently","accordingly","similarly","likewise","in essence","in other words","as a result","in fact","indeed","notably"];
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function splitSentences(t){var m=t.replace(/\s+/g,' ').match(/[^.!?…]+[.!?…]+["')\]]*|[^.!?…]+$/g);if(!m)return[];return m.map(function(s){return s.trim()}).filter(function(s){return s.length>1})}
+function wordsOf(s){return (s.toLowerCase().match(/[a-z']+/g)||[])}
+function analyzeText(raw){
+  var text=raw.trim();
+  var sentences=splitSentences(text);
+  var words=wordsOf(text);
+  var total=words.length;
+  var sLens=sentences.map(function(s){return wordsOf(s).length}).filter(function(n){return n>0});
+  var mean=sLens.length?sLens.reduce(function(a,b){return a+b},0)/sLens.length:0;
+  var sd=0; if(sLens.length){var v=sLens.reduce(function(a,n){return a+(n-mean)*(n-mean)},0)/sLens.length; sd=Math.sqrt(v)}
+  var cv=mean?sd/mean:0;
+  var burstScore=clamp(Math.round(100-(cv-0.18)/(0.85-0.18)*100),2,98); // low variation -> AI
+  var low=text.toLowerCase();
+  var phraseHits=[]; var hitCount=0;
+  AI_PHRASES.forEach(function(p){var i=low.indexOf(p);var c=0;while(i!==-1){c++;i=low.indexOf(p,i+p.length)}if(c>0){phraseHits.push({phrase:p,count:c});hitCount+=c}});
+  var per1k=total?hitCount/(total/1000):0;
+  var phraseScore=clamp(Math.round(per1k/7*100),2,98);
+  var trCount=0; TRANSITIONS.forEach(function(p){var i=low.indexOf(p);while(i!==-1){trCount++;i=low.indexOf(p,i+p.length)}});
+  var trPerSent=sentences.length?trCount/sentences.length:0;
+  var transScore=clamp(Math.round(trPerSent/0.85*100),2,98);
+  var contr=(text.match(/[a-z]'[a-z]/gi)||[]).length;
+  var contrPer1k=total?contr/(total/1000):0;
+  var contrScore=clamp(Math.round(100-contrPer1k/25*100),2,98); // few contractions -> AI
+  var fp=(text.match(/\b(I|I'm|I've|I'll|I'd|my|mine|me|we|our|us|myself|ourselves)\b/g)||[]).length;
+  var sp=(text.match(/\b(you|your|yours|you're|you've)\b/gi)||[]).length;
+  var voice=fp+sp*0.4+(text.match(/\?/g)||[]).length*2+(text.match(/!/g)||[]).length;
+  var voicePer1k=total?voice/(total/1000):0;
+  var voiceScore=clamp(Math.round(100-voicePer1k/22*100),2,98); // little personal voice -> AI
+  var starters={}; var rep=0;
+  sentences.forEach(function(s){var w=(s.match(/[A-Za-z']+/)||[''])[0].toLowerCase();if(starters[w])rep++;starters[w]=1});
+  var repRatio=sentences.length?rep/sentences.length:0;
+  var startScore=clamp(Math.round(repRatio/0.55*100),2,98);
+  var uniq={}; words.forEach(function(w){uniq[w]=1});
+  var uniqN=Object.keys(uniq).length;
+  var hapax=0; var freq={}; words.forEach(function(w){freq[w]=(freq[w]||0)+1}); Object.keys(freq).forEach(function(k){if(freq[k]===1)hapax++});
+  var hapaxRatio=uniqN?hapax/uniqN:0;
+  var divScore=clamp(Math.round(100-(hapaxRatio-0.25)/(0.75-0.25)*100),2,98); // low one-off word share -> AI-ish
+  var punctTypes=[';','—','–','(',')','"','“','?','!',':'].filter(function(c){return text.indexOf(c)>-1}).length;
+  var punctScore=clamp(Math.round(100-(punctTypes/7)*100),2,98);
+  var signals=[
+    {name:"Sentence rhythm",score:burstScore,note:"Your sentences average "+(Math.round(mean*10)/10)+" words with "+(cv<0.3?"very little":cv<0.55?"moderate":"healthy")+" length variation (CV "+(Math.round(cv*100)/100)+"). AI text tends to keep sentences evenly sized; humans swing between long and short."},
+    {name:"AI's favourite phrases",score:phraseScore,note:hitCount?("Found "+hitCount+" known AI-typical phrase"+(hitCount>1?"s":"")+" ("+(Math.round(per1k*10)/10)+" per 1,000 words) — phrases language models reuse constantly."):"No known AI-typical phrases found. That is a good human sign."},
+    {name:"Signpost stuffing",score:transScore,note:trCount+" formal transition words ("+(Math.round(trPerSent*100)/100)+" per sentence). Heavy signposting — moreover, furthermore, in conclusion — is classic machine polish."},
+    {name:"Contractions",score:contrScore,note:contr+" contractions ("+(Math.round(contrPer1k*10)/10)+" per 1,000 words). People naturally write don't / it's / we're; AI defaults to the stiff full forms."},
+    {name:"Personal voice",score:voiceScore,note:voice+" personal-voice markers (I, we, you, questions, exclamations). Text that talks like a person — opinions, asides, direct address — usually is one."},
+    {name:"Repetitive openings",score:startScore,note:Math.round(repRatio*100)+"% of sentences open with a first word already used to open another sentence. Templates repeat openings; humans vary them without thinking."},
+    {name:"Word freshness",score:divScore,note:Math.round(hapaxRatio*100)+"% of the vocabulary appears exactly once. Human writers keep pulling in one-off words; AI recycles a safer, smaller set."}
+  ];
+  var weights=[25,25,10,10,10,10,10];
+  var ai=0; signals.forEach(function(s,i){ai+=s.score*weights[i]/100});
+  ai=Math.round(clamp(ai,1,99));
+  var sentScores=sentences.map(function(s){
+    var w=wordsOf(s).length; var sc=50;
+    if(mean)sc+=clamp((1-Math.abs(w-mean)/mean)*30-15,-15,15)+15;
+    var sl=s.toLowerCase(); AI_PHRASES.forEach(function(p){if(sl.indexOf(p)>-1)sc+=22});
+    if(!/[a-z]'[a-z]/i.test(s))sc+=5;
+    if(/\b(I|my|me|we|you|your)\b/.test(s))sc-=14;
+    if(/[?!]/.test(s))sc-=8;
+    return clamp(Math.round(sc),3,97);
+  });
+  return {ai:ai,human:100-ai,signals:signals,phraseHits:phraseHits,sentences:sentences,sentScores:sentScores,
+    stats:{words:total,sentences:sentences.length,avgSent:Math.round(mean*10)/10,uniq:uniqN,readMin:Math.max(1,Math.round(total/200))}};
+}
+// === CORE END ===
+
+var SAMPLE_AI="In today's fast-paced digital landscape, content creation plays a crucial role in building a successful online presence. Furthermore, it is important to note that consistency is essential when it comes to audience engagement. Moreover, leveraging cutting-edge tools and strategies can significantly elevate your content and unlock its full potential. Additionally, creators should focus on delivering value, as this serves as a testament to their commitment to quality. In conclusion, by embracing these approaches and adapting to the ever-evolving world of social media, you can ultimately achieve remarkable results and make a significant impact in your niche.";
+var SAMPLE_HU="Okay so here's the thing nobody tells you about fishing at 5am — it's freezing, your hands go numb, and the fish? They don't care. My grandfather took me once when I was nine. Once! I caught nothing but a cold, and honestly, I still remember his laugh more than the river. Would I go again? In a heartbeat. Some mornings aren't really about the fish at all, you know? They're about who you're standing next to.";
+var input=document.getElementById('input'),wcount=document.getElementById('wcount');
+function updCount(){var n=(input.value.trim().match(/\S+/g)||[]).length;wcount.textContent=n+" words"}
+input.addEventListener('input',updCount);
+document.getElementById('sampleAi').onclick=function(){input.value=SAMPLE_AI;updCount()};
+document.getElementById('sampleHu').onclick=function(){input.value=SAMPLE_HU;updCount()};
+document.getElementById('clear').onclick=function(){input.value='';updCount();document.getElementById('results').style.display='none'};
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+document.getElementById('analyze').onclick=function(){
+  var btn=this; var text=input.value;
+  var n=(text.trim().match(/\S+/g)||[]).length;
+  if(n<30){alert('Please paste a little more text — at least 30 words, and 50+ works much better.');return}
+  var box=document.getElementById('toolbox'); box.classList.add('scanning'); btn.disabled=true; btn.textContent='Analyzing…';
+  setTimeout(function(){
+    var r=analyzeText(text);
+    box.classList.remove('scanning'); btn.disabled=false; btn.textContent='Analyze text';
+    document.getElementById('results').style.display='block';
+    document.getElementById('arcpct').textContent=r.ai+'%';
+    document.getElementById('arc').style.strokeDashoffset=String(283-(283*r.ai/100));
+    document.getElementById('aipct').textContent=r.ai+'%';
+    document.getElementById('hupct').textContent=r.human+'%';
+    document.getElementById('aibar').style.width=r.ai+'%';
+    document.getElementById('hubar').style.width=r.human+'%';
+    var v,vs;
+    if(r.ai>=70){v='Likely AI-generated';vs='This text carries the classic fingerprint of an AI writer: even rhythm, polished signposts and machine-favourite phrases. If a human wrote it, they edited it to within an inch of its life.'}
+    else if(r.ai>=56){v='Probably AI-assisted';vs='Most signals lean machine — likely AI-generated or AI-drafted and lightly edited by a person.'}
+    else if(r.ai>=45){v='Mixed — hard to call';vs='The signals genuinely split. This could be a human writing formally, or AI text that a human edited well. Read it and judge the ideas, not just the style.'}
+    else if(r.ai>=30){v='Probably human';vs='Most signals lean human: varied rhythm and a natural voice. A little polish here and there, but the mess of a real writer is present.'}
+    else{v='Likely human-written';vs='This reads like a person: uneven, personal, full of one-off word choices no model would bother with.'}
+    document.getElementById('verdict').textContent=v;
+    document.getElementById('vsub').textContent=vs;
+    var sig=document.getElementById('signals'); sig.innerHTML='';
+    r.signals.forEach(function(s){
+      var col=s.score>=65?'var(--rd)':s.score>=45?'var(--am)':'var(--gr)';
+      var d=document.createElement('div'); d.className='sigrow';
+      d.innerHTML='<div class="top"><span class="name">'+s.name+'</span><span class="val" style="color:'+col+'">'+s.score+'% AI-like</span></div><div class="bar"><i style="background:'+col+';width:'+s.score+'%"></i></div><p>'+s.note+'</p>';
+      sig.appendChild(d);
+    });
+    var heat=document.getElementById('heat'); heat.innerHTML='';
+    r.sentences.forEach(function(s,i){
+      var sc=r.sentScores[i]; var cls=sc>=65?'h-ai':sc>=45?'h-mid':'h-hu';
+      var sp=document.createElement('span'); sp.className=cls; sp.title='AI-likeness: '+sc+'%'; sp.textContent=s+' ';
+      heat.appendChild(sp);
+    });
+    var pb=document.getElementById('phrasebox');
+    if(r.phraseHits.length){
+      pb.innerHTML='<h2 class="sec">Flagged AI-typical phrases</h2><div class="chips">'+r.phraseHits.map(function(h){return '<span class="fchip">"'+esc(h.phrase)+'"'+(h.count>1?' ×'+h.count:'')+'</span>'}).join('')+'</div>';
+    } else pb.innerHTML='';
+    var st=r.stats;
+    document.getElementById('stats').innerHTML=
+      '<div class="stat"><div class="n">'+st.words+'</div><div class="l">words</div></div>'+
+      '<div class="stat"><div class="n">'+st.sentences+'</div><div class="l">sentences</div></div>'+
+      '<div class="stat"><div class="n">'+st.avgSent+'</div><div class="l">avg words / sentence</div></div>'+
+      '<div class="stat"><div class="n">'+st.uniq+'</div><div class="l">unique words</div></div>'+
+      '<div class="stat"><div class="n">'+st.readMin+' min</div><div class="l">reading time</div></div>';
+    document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+  },900);
+};
+</script>
+</body></html>
