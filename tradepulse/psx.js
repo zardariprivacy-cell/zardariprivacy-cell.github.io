@@ -1,7 +1,8 @@
 /* =====================================================================
    TradePulse AI — PSX Stocks module (v3)
    Pakistan Stock Exchange daily analysis, 100% client-side.
-   Data: Yahoo Finance daily candles (.KA) via the allorigins CORS relay.
+   Data: Yahoo Finance daily candles (.KA) via the allorigins CORS relay
+   (/raw first, /get fallback — see fetchCandles).
    Method: TradingView-style transparent technical ratings (see README).
    Privacy: no accounts, no tracking — analysis runs on this device only.
    ===================================================================== */
@@ -261,8 +262,9 @@ if (typeof module !== 'undefined' && module.exports) { module.exports = PSX_LIB;
 
 /* ============================ browser app ============================ */
 const $ = id => document.getElementById(id);
-const PROXY = 'https://api.allorigins.win/raw?url=';
-const yahooUrl = s => PROXY + encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/' + s + '.KA?range=1y&interval=1d');
+const PROXY_RAW = 'https://api.allorigins.win/raw?url=';
+const PROXY_GET = 'https://api.allorigins.win/get?url=';
+const yahooChartUrl = (s, range) => 'https://query1.finance.yahoo.com/v8/finance/chart/' + s + '.KA?range=' + (range || '1y') + '&interval=1d';
 /* Heavyweight basket — only symbols Yahoo Finance actually carries
    (verified live 23 Nov 2026; HUBC and ENGROH are NOT on Yahoo). */
 const BASKET = ['FFC', 'OGDC', 'MCB', 'PPL', 'MARI', 'HBL', 'NBP', 'SNGP', 'UBL', 'MEBL', 'LUCK', 'SYS', 'EFERT', 'POL', 'PSO', 'BAHL'];
@@ -273,21 +275,56 @@ function cacheGet(sym) {
   try { const raw = localStorage.getItem('psx_cache_' + sym); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
 }
 function cacheSet(sym, candles) {
-  try { localStorage.setItem('psx_cache_' + sym, JSON.stringify({ d: new Date().toISOString().slice(0, 10), candles })); } catch (e) { /* storage full — ignore */ }
+  try {
+    const old = cacheGet(sym);
+    if (old && old.candles && old.candles.length > candles.length) return; // keep the longer (1y) series over a shorter one
+    localStorage.setItem('psx_cache_' + sym, JSON.stringify({ d: new Date().toISOString().slice(0, 10), candles }));
+  } catch (e) { /* storage full — ignore */ }
 }
-async function fetchCandles(sym, tries) {
-  tries = tries || 2;
-  for (let a = 0; a < tries; a++) {
+async function fetchWithTimeout(url, ms) {
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), ms);
+  try { return await fetch(url, { signal: ctl.signal }); }
+  finally { clearTimeout(t); }
+}
+/* Accept a Yahoo chart payload only if it really carries a result;
+   a chart.error means Yahoo does not carry the symbol at all. */
+function validateChart(j) {
+  if (j && j.chart && j.chart.error) return { notFound: true };
+  if (!j || !j.chart || !j.chart.result) throw new Error('bad payload');
+  const candles = parseYahoo(j);
+  if (candles && candles.length > 30) return { candles };
+  throw new Error('empty');
+}
+async function fetchViaRaw(sym, range) {
+  const r = await fetchWithTimeout(PROXY_RAW + encodeURIComponent(yahooChartUrl(sym, range)), 20000);
+  if (r.status === 404) return { notFound: true };
+  if (!r.ok) throw new Error('raw HTTP ' + r.status);
+  return validateChart(await r.json());
+}
+async function fetchViaGet(sym, range) {
+  const r = await fetchWithTimeout(PROXY_GET + encodeURIComponent(yahooChartUrl(sym, range)), 40000);
+  if (!r.ok) throw new Error('get HTTP ' + r.status);
+  const outer = await r.json();
+  if (outer && outer.status && outer.status.http_code === 404) return { notFound: true };
+  if (!outer || typeof outer.contents !== 'string') throw new Error('bad relay payload');
+  return validateChart(JSON.parse(outer.contents));
+}
+/* Fallback chain: /raw → /get → /get once more → saved data.
+   The relay throttles, so attempts stay sequential with a pause. */
+async function fetchCandles(sym, range) {
+  range = range || '1y';
+  const attempts = [
+    () => fetchViaRaw(sym, range),
+    () => fetchViaGet(sym, range),
+    () => fetchViaGet(sym, range)
+  ];
+  for (let a = 0; a < attempts.length; a++) {
     try {
-      const r = await fetch(yahooUrl(sym));
-      if (r.status === 404) return { notFound: true };
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const j = await r.json();
-      if (j && j.chart && j.chart.error) return { notFound: true };
-      const candles = parseYahoo(j);
-      if (candles && candles.length > 30) { cacheSet(sym, candles); return { candles, stale: false }; }
-      throw new Error('empty');
-    } catch (e) { if (a < tries - 1) await sleep(900); }
+      const res = await attempts[a]();
+      if (res.notFound) return { notFound: true };
+      if (res.candles) { cacheSet(sym, res.candles); return { candles: res.candles, stale: false }; }
+    } catch (e) { if (a < attempts.length - 1) await sleep(900); }
   }
   const cached = cacheGet(sym);
   if (cached && cached.candles && cached.candles.length > 30) return { candles: cached.candles, stale: true, staleDate: cached.d };
@@ -297,14 +334,16 @@ async function fetchCandles(sym, tries) {
 /* ---------------- market mood (basket) ---------------- */
 async function loadBasket() {
   if (basketDone) return; basketDone = true;
+  $('psxMoodUpdated').textContent = 'Loading from the free data relay — this can take 10–20 seconds…';
   const results = [];
   for (const s of BASKET) {
-    const r = await fetchCandles(s, 2);
+    const r = await fetchCandles(s, '6mo');
     if (r.candles) { try { results.push({ s, a: analyzeCandles(r.candles), stale: r.stale }); } catch (e) { /* skip */ } }
     await sleep(350);
   }
   const box = $('psxMoodBody');
   if (!results.length) {
+    $('psxMoodUpdated').textContent = 'Basket data unavailable right now.';
     box.innerHTML = '<p class="muted small">Could not load market data right now (the free data relay may be busy). Your saved data and the news below still work — try Refresh in a little while.</p>';
     return;
   }
@@ -427,9 +466,9 @@ async function openStock(sym) {
   const meta = SYMBOLS.find(x => x.s === sym) || { s: sym, n: '' };
   const box = $('psxDetail');
   box.hidden = false;
-  box.innerHTML = '<div class="card signal-card"><div class="card-head"><h2>' + sym + '</h2><span class="card-sub">' + escapeHtml(meta.n) + '</span></div><p class="muted small">Loading daily data…</p></div>';
+  box.innerHTML = '<div class="card signal-card"><div class="card-head"><h2>' + sym + '</h2><span class="card-sub">' + escapeHtml(meta.n) + '</span></div><p class="muted small">Loading daily data from the free data relay — this can take 10–20 seconds…</p></div>';
   box.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  const r = await fetchCandles(sym, 2);
+  const r = await fetchCandles(sym);
   if (currentSym !== sym) return;
   if (r.notFound || r.error) {
     box.innerHTML = '<div class="card"><div class="card-head"><h2>' + sym + '</h2><span class="card-sub">' + escapeHtml(meta.n) + '</span></div>' +
