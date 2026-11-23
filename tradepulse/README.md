@@ -1,6 +1,6 @@
-# TradePulse AI — Binance Market Analyzer
+# TradePulse AI — Crypto & PSX Market Analyzer
 
-A mobile-first web app (add it to your home screen and it behaves like an app) that watches **every USDT spot pair on Binance** and explains, in plain English, whether the market is leaning buy, sell, or neutral for each coin.
+A mobile-first web app (add it to your home screen and it behaves like an app) that watches **every USDT spot pair on Binance** and explains, in plain English, whether the market is leaning buy, sell, or neutral for each coin. **v3 adds a full Pakistan Stock Exchange (PSX) section** — see below.
 
 **Live data only** — prices come straight from the Binance public API (`data-api.binance.vision`, fallback `api.binance.com`); the market-mood gauge uses the free Fear & Greed Index from alternative.me, and the converter's PKR rate comes from open.er-api.com. No account, no API key, no server: everything runs in the browser.
 
@@ -39,7 +39,22 @@ Real coin icons load from the `cryptocurrency-icons` set on jsDelivr (`svg/color
 
 ## Files
 
-`index.html` · `styles.css` · `app.js` · `manifest.json` · `icon.svg` / `icon-192.png` / `icon-512.png` — a fully static site, no build step. Serve the folder with any static host or open `index.html` from a local server.
+`index.html` · `styles.css` · `app.js` (crypto) · `psx.js` + `psx-symbols.json` (PSX section) · `manifest.json` · `icon.svg` / `icon-192.png` / `icon-512.png` — a fully static site, no build step. Serve the folder with any static host or open `index.html` from a local server.
+
+## PSX Stocks (v3)
+
+A **Pakistan Stock Exchange** analyzer on the daily timeframe, in its own tab:
+
+- **All listed companies are in the app** — a searchable directory of every PSX symbol with its company name (`psx-symbols.json`, scraped at build time from the PSX Data Portal's "Market Eligible Scrips" list; regenerate monthly). Tap any stock to analyze it.
+- **Market Mood gauge** — there is no free browser-usable KSE-100 feed (the PSX Data Portal is CORS-locked), so the gauge is built honestly from a **basket of top KSE heavyweights** (FFC, OGDC, MCB, PPL, MARI, HBL, NBP, SNGP, UBL, MEBL, LUCK, SYS, EFERT, POL, PSO, BAHL): % above their 50-day average + advancers/decliners + average move → Very Weak…Very Strong, with one factual plain-English condition sentence. It is labelled as a basket gauge, **not** the KSE-100. When a Dawn/Business Recorder headline reports the official KSE-100 close, it is shown with its source named, and a permanent link points to the official PSX Data Portal.
+- **Per-stock analysis (TradingView-style, fully transparent):** daily candles from Yahoo Finance (`.KA` symbols) fetched through the public allorigins CORS relay. **12 moving-average votes** (price vs SMA/EMA 10/20/50/100/200 + SMA 10/20 and EMA 50/200 crossovers) and **7 oscillator votes** (RSI-14, Stochastic, CCI-20, MACD, Stochastic RSI, Williams %R, Momentum-10) using TradingView's published conditions; the average vote maps to **Strong Sell / Sell / Neutral / Buy / Strong Buy** with TradingView's bands (±0.1, ±0.5). Every indicator's value and vote is listed, with plain-English reasons and classic pivot-point support/resistance. Price and change are always derived from the candles themselves (Yahoo's `meta` price fields for PSX are frozen at Jul 2024 — never used).
+- **Honest gaps:** a few actively traded stocks (e.g. HUBC, ENGROH) are not carried by Yahoo's free feed at all — those show a clear "no free daily data yet" state with a link to the official PSX quote, never invented numbers. If a fetch fails, the last good data is served from the device cache with a visible **"Saved data"** badge.
+- **News, related but never blended:** latest Dawn Business + Business Recorder Markets headlines (fetched directly — both feeds are CORS-open), each with a transparent keyword sentiment tag (Positive/Negative/Neutral, word lists in `psx.js`), a "News mood today" summary line kept **separate** from the technical score, and stock chips on headlines that name a listed company — tap to open that stock's analysis.
+- **Delay honesty:** PSX data here is a free **delayed / end-of-day** feed (daily candles only, no live ticks). The section is for daily market direction, not intraday trading.
+
+## Privacy
+
+No account, no sign-up, no cookies, no tracking, no analytics — anywhere in TradePulse. All analysis runs **on your device**; watchlists, alerts and portfolios live in your browser's localStorage only. Outbound requests go only to public data sources (Binance, alternative.me, open.er-api.com, Dawn, Business Recorder, Yahoo Finance). PSX stock quotes route through the public allorigins CORS relay, which can see the stock symbol requested — nothing else about you; TradePulse collects, stores and sells nothing.
 
 ## Disclaimer
 

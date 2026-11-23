@@ -285,3 +285,45 @@ main{padding:14px 14px 4px}
 .pf-row:last-child{border-bottom:none}
 .pf-main{flex:1; min-width:0}
 .pf-right{text-align:right; flex:none}
+
+/* ================= v3 additions: PSX Stocks ================= */
+.psx-mood-stats{margin-top:12px; margin-bottom:6px}
+.psx-kse-row{margin-top:12px; font-size:13px; line-height:1.5; background:var(--card);
+  border:1px solid var(--line); border-radius:10px; padding:9px 12px}
+.psx-kse-row b{font-size:15px}
+.psx-basket-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin:10px 0 4px}
+.psx-refresh{padding:6px 14px; font-size:12px}
+.psx-basket-list{margin-top:4px}
+.psx-basket-row{display:flex; align-items:center; gap:10px; width:100%; background:none; border:none;
+  border-bottom:1px solid rgba(43,49,57,.6); padding:9px 2px; cursor:pointer; color:var(--text); font:inherit; text-align:left}
+.psx-basket-row:last-child{border-bottom:none}
+.psx-basket-sym{font-weight:800; font-size:14px; width:52px; flex:none}
+.psx-basket-price{flex:1; font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums}
+.psx-basket-rating{font-size:12px; font-weight:800; width:78px; flex:none; text-align:right}
+.psx-link{color:var(--yellow); text-decoration:none; font-weight:700}
+.psx-dir-arrow{color:var(--yellow); font-size:12.5px; font-weight:700; flex:none}
+.psx-stale{color:var(--yellow); font-weight:700}
+.psx-btn{display:inline-block; background:var(--card2); border:1px solid var(--line); color:var(--yellow);
+  border-radius:11px; padding:10px 16px; font-size:13.5px; font-weight:700; text-decoration:none}
+.psx-table{width:100%; border-collapse:collapse; font-size:13px}
+.psx-table th{text-align:left; color:var(--muted); font-size:11px; letter-spacing:.6px; text-transform:uppercase;
+  padding:6px 4px; border-bottom:1px solid var(--line)}
+.psx-table td{padding:7px 4px; border-bottom:1px solid rgba(43,49,57,.6); font-variant-numeric:tabular-nums}
+.psx-table tr:last-child td{border-bottom:none}
+.psx-num{text-align:right; font-weight:600}
+.psx-table th:nth-child(2){text-align:right}
+.psx-vote{font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px; letter-spacing:.3px}
+.psx-vote-buy{background:rgba(14,203,129,.13); color:var(--green)}
+.psx-vote-sell{background:rgba(246,70,93,.13); color:var(--red)}
+.psx-vote-neu{background:rgba(132,142,156,.15); color:var(--muted)}
+.psx-news-item{padding:10px 0; border-bottom:1px solid rgba(43,49,57,.6)}
+.psx-news-item:last-child{border-bottom:none}
+.psx-news-title{color:var(--text); text-decoration:none; font-size:14px; font-weight:600; line-height:1.45; display:block}
+.psx-news-title:active{color:var(--yellow)}
+.psx-news-meta{display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-top:6px; font-size:11.5px; color:var(--muted)}
+.psx-sent-chip{font-size:10.5px; font-weight:800; padding:2.5px 9px; border-radius:99px; letter-spacing:.3px}
+.psx-chip-pos{background:rgba(14,203,129,.13); color:var(--green)}
+.psx-chip-neg{background:rgba(246,70,93,.13); color:var(--red)}
+.psx-chip-neu{background:rgba(132,142,156,.15); color:var(--muted)}
+.psx-sym-chip{background:var(--card2); border:1px solid var(--line); color:var(--yellow); border-radius:99px;
+  padding:2.5px 10px; font:inherit; font-size:11px; font-weight:800; cursor:pointer}
