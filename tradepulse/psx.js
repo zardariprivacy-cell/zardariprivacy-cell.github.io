@@ -262,6 +262,7 @@ if (typeof module !== 'undefined' && module.exports) { module.exports = PSX_LIB;
 
 /* ============================ browser app ============================ */
 const $ = id => document.getElementById(id);
+const PROXY_OWN = 'https://tp-relay.pages.dev/?url=';
 const PROXY_RAW = 'https://api.allorigins.win/raw?url=';
 const PROXY_GET = 'https://api.allorigins.win/get?url=';
 const yahooChartUrl = (s, range) => 'https://query1.finance.yahoo.com/v8/finance/chart/' + s + '.KA?range=' + (range || '1y') + '&interval=1d';
@@ -296,6 +297,12 @@ function validateChart(j) {
   if (candles && candles.length > 30) return { candles };
   throw new Error('empty');
 }
+async function fetchViaOwn(sym, range) {
+  const r = await fetchWithTimeout(PROXY_OWN + encodeURIComponent(yahooChartUrl(sym, range)), 25000);
+  if (r.status === 404) return { notFound: true };
+  if (!r.ok) throw new Error('own relay HTTP ' + r.status);
+  return validateChart(await r.json());
+}
 async function fetchViaRaw(sym, range) {
   const r = await fetchWithTimeout(PROXY_RAW + encodeURIComponent(yahooChartUrl(sym, range)), 20000);
   if (r.status === 404) return { notFound: true };
@@ -315,8 +322,9 @@ async function fetchViaGet(sym, range) {
 async function fetchCandles(sym, range) {
   range = range || '1y';
   const attempts = [
+    () => fetchViaOwn(sym, range),
+    () => fetchViaOwn(sym, range),
     () => fetchViaRaw(sym, range),
-    () => fetchViaGet(sym, range),
     () => fetchViaGet(sym, range)
   ];
   for (let a = 0; a < attempts.length; a++) {
